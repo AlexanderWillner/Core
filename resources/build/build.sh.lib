@@ -79,7 +79,11 @@ function doDefaultProject() {
         if [ "$quick" ] || [ "$build" ]; then
             doLatex "$DIR_TMP" "$FILE_MAIN";
             NAME=`basename $FILE_MAIN .tex`;
-            pdfopt $DIR_TMP/$NAME.pdf $NAME.pdf
+            if [ "$DOOPT" == "1" ]; then
+                pdfopt $DIR_TMP/$NAME.pdf $NAME.pdf
+            else
+                cp $DIR_TMP/$NAME.pdf $NAME.pdf
+            fi
             echo "File created: $NAME.pdf";
         fi;
     else
