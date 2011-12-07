@@ -65,6 +65,7 @@ function doDefaultProject() {
         fi;
 
         if [ "$build" ]; then
+                cleanAcronyms "$FILE_ACRO"
         	doLatex "$DIR_TMP" "$FILE_MAIN";
         	if [ "$DOINDEX" == "1" ]; then
         		doIndex "$DIR_TMP" "$DIR_LYT";
@@ -84,6 +85,7 @@ function doDefaultProject() {
             else
                 cp $DIR_TMP/$NAME.pdf $NAME.pdf
             fi
+            showWarnings;
             echo "File created: $NAME.pdf";
         fi;
     else
@@ -147,7 +149,7 @@ function checkEnvironment() {
       fi;
     done;
     if [ "$_error" != "0" ]; then
-        exit 1;
+       exit 1;
     fi;
 }
 
@@ -229,7 +231,11 @@ function checkProject() {
 	_file_main="$7";
 	_file_bib="$8";
 	_language="$9";
+        #TODO: refactor this!
+	#_dir_cfg="$10";
+        _dir_cfg="$DIR_CFG";
 	_error=0;
+
     echo -n "Checking orthography...";
 	if [ "$DOSPELLCHECK" == "1" ]; then
       for file in `ls $_dir_sources/*.tex`; do
@@ -298,9 +304,9 @@ function checkProject() {
     echo -n "Checking config...";
     checkRule "$BAD_CONFIG" "$_file_config" "Avoid";
     if [ "$?" != "0" ]; then _error=1; fi
-    checkRule "$BAD_CONFIG" "$_dir_resources/config/default.tex" "Avoid";
+    checkRule "$BAD_CONFIG" "$_dir_cfg/default.tex" "Avoid";
     if [ "$?" != "0" ]; then _error=1; fi
-    checkRule "$BAD_CONFIG" "$_dir_resources/config/pdfmetadata.tex" "Avoid";
+    checkRule "$BAD_CONFIG" "$_dir_cfg/pdfmetadata.tex" "Avoid";
     if [ "$?" != "0" ]; then _error=1; fi
     echo "done";
     echo -n "Checking latex (l2tabu)...";
@@ -357,9 +363,20 @@ function doCleanup() {
     echo -n "Cleaning up...";
 	rm -rf "$_dir_tmp" 2> /dev/null;
     if [ "$isNotGnu" == "1" ]; then
-      find . -path '*.git' -prune -o -regex ".*\.\(bak\|aux\|bbl\|blg\|idx\|out\|new\|lot\|lof\|toc\|log\|ilg\|gls\|glo\|ind\|slg\|syg\|lol\|syi\|maf\|mtc.*\)$" -exec rm {} \;
+      find . -path '*.git' -prune -o -regex ".*\.\(brf\|bak\|aux\|bbl\|blg\|idx\|out\|new\|lot\|lof\|toc\|log\|ilg\|gls\|glo\|ind\|slg\|syg\|lol\|syi\|maf\|mtc.*\)$" -exec rm {} \;
     else
-      find -E . -path '*.git' -prune -o -regex ".*\.(bak|aux|bbl|blg|idx|out|new|lot|lof|toc|log|ilg|ind|gls|glo|slg|syg|syi|lol|maf|mtc.*)$" -exec rm {} \;
+      find -E . -path '*.git' -prune -o -regex ".*\.(brf|bak|aux|bbl|blg|idx|out|new|lot|lof|toc|log|ilg|ind|gls|glo|slg|syg|syi|lol|maf|mtc.*)$" -exec rm {} \;
+    fi
+    echo "done";
+}
+
+
+function cleanAcronyms() {
+    _file_acro="$1";
+    echo -n "Sorting acronyms...";
+    if [ -e "$_file_acro" ]; then
+        sort "$_file_acro"|uniq > "$_file_acro.uniq" && \
+        mv "$_file_acro.uniq" "$_file_acro"
     fi
     echo "done";
 }
@@ -390,6 +407,8 @@ function doBibtex() {
     startLogging;
     cp -r "$_dir_res" "$_dir_tmp";
     cp "$_file_bib" "$_dir_tmp";
+    # TODO: refactor the next line!
+    cp -R "$DIR_LIB" "$_dir_tmp";
     cp *.bib "$_dir_tmp";
     cp *.bst "$_dir_tmp";
     cp *.cls "$_dir_tmp";
