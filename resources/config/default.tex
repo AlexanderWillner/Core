@@ -1,3 +1,31 @@
+% bugfixes ---------------------------------------------------------------------
+\let\spvec\vec                   % llncs with amsmath bugfix
+\let\vec\accentvec               % llncs with amsmath bugfix
+%\newcommand{\subparagraph}{}     % IEEETrans with titlesec bugfix
+% ------------------------------------------------------------------------------
+
+% fix for old tex installations ------------------------------------------------
+\makeatletter
+\@ifundefined{float@listhead}{}{%
+    \renewcommand*{\lstlistoflistings}{%
+        \begingroup
+            \if@twocolumn
+                \@restonecoltrue\onecolumn
+            \else
+                \@restonecolfalse
+            \fi
+            \float@listhead{\lstlistlistingname}%
+            \setlength{\parskip}{\z@}%
+            \setlength{\parindent}{\z@}%
+            \setlength{\parfillskip}{\z@ \@plus 1fil}%
+            \@starttoc{lol}%
+            \if@restonecol\twocolumn\fi
+        \endgroup
+    }%
+}
+\makeatother
+% ------------------------------------------------------------------------------
+
 \makeatletter
 \providecommand{\IfPackageLoaded}[2]{\@ifpackageloaded{#1}{#2}{}}
 \providecommand{\IfPackageNotLoaded}[2]{\@ifpackageloaded{#1}{}{#2}}
@@ -6,6 +34,8 @@
 
 \IfPackageNotLoaded{CJKutf8}{\usepackage[utf8x]{inputenc}} % File encoding: Normal UTF8
 \usepackage{cmap}                     % Support copy and search
+\input{glyphtounicode}                % Support copy and search
+\pdfgentounicode=1                    % Support copy and search
 \usepackage[tracking=true,            % Fonts: hyphenatable letterspacing
 expansion=true,                       % Fonts: better grey value
 protrusion=true]{microtype}           % Fonts: margin kerning
@@ -51,7 +81,6 @@ hypertexnames=true                    % Whatever ;)
 \usepackage{stfloats}                 % Makes LaTeX honour ‘[b]’ placement
 \usepackage{amssymb}                  % Springer Verlag
 \usepackage{amsmath}                  % For eqref
-\usepackage{acronym}                  % For acronyms
 \usepackage{paralist}                 % For inline lists
 \usepackage{fixltx2e}                 % Provides fixes for LaTeX
 \usepackage{fix-cm}                   % Provides fixes for LaTeX
@@ -60,9 +89,16 @@ hypertexnames=true                    % Whatever ;)
 \usepackage{xspace}                   % Fixing some spacing issues
 \usepackage{ellipsis}                 % Puts space around ellipses
 \usepackage{ragged2e}                 % New commands/env. for setting ragged text
-\usepackage[bf]{caption}[2008/08/24]  % Bold caption (better contrast)
+\usepackage{lmodern}                  % Nicer fonts (for all)
+\usepackage{ltxtable}                 % Long complex tables
+\usepackage[switch*,modulo]{lineno}   % Show line numbers
+
 \newcommand{\etc}{etc.\@\xspace}      % Fixing some spacing issues
 \lstset{columns=fullflexible}         % Listings in multicolumn mode
+
+% To be used in the project specific config file:
+%\usepackage[bf]{caption}[2008/08/24]  % Bold caption (better contrast)
+%\usepackage{acronym}                  % For acronyms
 
 \hyphenation{op-tical net-works semi-conduc-tor con-cept}
 
