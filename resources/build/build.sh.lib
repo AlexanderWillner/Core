@@ -170,6 +170,11 @@ function checkRule() {
     IFS="#";
     STATE=0;
 
+    if [ ! -f "$_filename" ]; then
+        echo -n "s..."
+        return 0
+    fi
+
     content=`cat $_filename | perl -pe "s/%.*$//g"`;
     for word in $_list; do
       if [ "$_casesens" == "" ]; then
