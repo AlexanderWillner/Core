@@ -6,6 +6,7 @@ help:
 	@echo " * spell   : Check for spelling errors (aspell)"
 	@echo " * eval    : Run evaluation scripts (e.g. R)"
 	@echo " * generate: Generate images (gnuplot, R, dot/graphviz, ...)"
+	@echo " * update  : Get the latest sources (incl. latest library)"
 
 clean:
 	@./build.sh -c
@@ -27,3 +28,7 @@ eval:
 
 generate:
 	@./build.sh -g
+
+update:
+	@git submodule foreach git pull origin master
+	@git pull
