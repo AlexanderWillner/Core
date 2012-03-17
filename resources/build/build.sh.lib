@@ -95,6 +95,7 @@ function doDefaultProject() {
                 echo "Set DPATH first!";
             else
               cp "$NAME.pdf" "$DPATH"
+              chmod go+r "$DPATH/$NAME.pdf"
             fi
         fi
     else
