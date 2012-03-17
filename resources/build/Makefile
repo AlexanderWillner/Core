@@ -6,6 +6,7 @@ help:
 	@echo " * spell   : Check for spelling errors (aspell)"
 	@echo " * eval    : Run evaluation scripts (e.g. R)"
 	@echo " * generate: Generate images (gnuplot, R, dot/graphviz, ...)"
+	@echo " * deploy  : Deploy the PDF file to a directory (e.g. for automated builds)"
 	@echo " * update  : Get the latest sources (incl. latest library)"
 
 clean:
@@ -28,6 +29,10 @@ eval:
 
 generate:
 	@./build.sh -g
+
+
+deploy:
+	@./build.sh -d ${DPATH}
 
 update:
 	@git submodule foreach git pull origin master
