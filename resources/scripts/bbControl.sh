@@ -1,25 +1,26 @@
 #!/bin/bash
 # ##############################################################################
 #
-# Buildbot start script for Thesis QA
+# Buildbot start script for "Theses"
 #
-# @version  2011-12-06
+# @version  1.1 (2012-03-17)
 # @author   Alex
-# @url      github.com/Thesis
-#
+# @url      http://github.com/Thesis
 # @todo     Just an initial version, a lot of things todo
 # @history  1.0 Initial version
 #
 # ##############################################################################
 
 # config #######################################################################
-name_master="master-thesis"
-name_slave="slave-thesis"
-url_master="http://localhost:8111/waterfall"
+export PATH=/usr/local/share/python:/usr/local/bin:$PATH
+
+name_master="paper-master"
+name_slave="paper-slave"
+url_master="http://localhost:8811/waterfall"
 url_config="https://raw.github.com/Thesis/Core/master/resources/build/buildbot.cfg"
-conf_port="localhost:4585"
-conf_pwd="password"
-conf_slave="bot-name"
+conf_port="localhost:9989"
+conf_pwd="pass"
+conf_slave="example-slave"
 # ##############################################################################
 
 # auto setup ###################################################################
@@ -28,9 +29,6 @@ function setupEasy {
     if [ "`which $1`" == "" ]; then
         echo "We need to install $1 first. Please press enter";
         read
-        if [ "`which easy_install`" == "" ]; then
-                echo "Ok, no easy_install on your machine. Please install $1 yourself. Sorry."
-        fi
         easy_install $1
         if [ "$?" != "0" ]; then
             echo "Ok, trying again as root. Please press enter";
@@ -55,6 +53,7 @@ while true; do
   echo " 4) Reload config"
   echo " 5) Invoke change for all projects"
   echo " 6) Invoke change for specific project"
+  echo " 7) Show log"
   echo "========================================="
   echo -n "Your choice: "
 
@@ -66,27 +65,13 @@ while true; do
     if [ "`which buildbot`" == "" ]; then setupEasy buildbot; fi
     if [ ! -d "$name_master" ]; then buildbot create-master "$name_master"; fi
     if [ ! -f "$name_master/master.cfg" ]; then curl "$url_config" > "$name_master/master.cfg"; fi
-    if [ "`ps waux|grep -i python|grep $name_master`" == "" ]; then
-        buildbot start "$name_master";
-        if [ "$?" != "0" ]; then
-            buildbot stop "$name_master"
-            echo "Sorry, something is wrong - please fix it.";
-            exit 1;
-        fi
-    fi
+    if [ "`ps waux|grep -i python|grep $name_master`" == "" ]; then buildbot start "$name_master"; fi
     # ##########################################################################
 
     # start slave ##################################################################
     if [ "`which buildslave`" == "" ]; then setupEasy buildbot-slave; fi
     if [ ! -d "$name_slave" ]; then buildslave create-slave "$name_slave" "$conf_port" "$conf_slave" "$conf_pwd"; fi
-    if [ "`ps waux|grep -i python|grep $name_slave`" == "" ]; then
-        nice -n 15 buildslave start "$name_slave";
-        if [ "$?" != "0" ]; then
-            buildslave stop "$name_slave"
-            echo "Sorry, something is wrong - please fix it.";
-            exit 1;
-        fi
-    fi
+    if [ "`ps waux|grep -i python|grep $name_slave`" == "" ]; then nice -n 15 buildslave start "$name_slave"; fi
     # ##############################################################################
   elif [ "$input" == "2" ]; then
     buildslave stop "$name_slave"
@@ -101,6 +86,8 @@ while true; do
     echo -n "Which project: "
     read project
     buildbot sendchange --project "$project" --master "$conf_port" --who "script" manual
+  elif [ "$input" == "7" ]; then
+    tail -f "${name_master}/twistd.log"
   fi
 done
 # ##############################################################################
