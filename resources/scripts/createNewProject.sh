@@ -11,7 +11,8 @@
 
 # config ######################################################################
 template_type="Paper" # Paper | Expose | Review | Thesis
-default_name="template" # template | expose | thesis_template
+default_name="template" # template | expose | review | thesis_template
+
 vcs_path="publications/"
 wiki_path="Publication/"
 wiki_param="?action=edit&template=Publication"
@@ -66,10 +67,14 @@ perl -p -i -e "s/${default_name}/${project_name}/g" ".texlipse"
 checkError $?
 
 echo "Renaming special files..."
+[ -f "src/${default_name}.tex" ] && mv "src/${default_name}.tex" "src/${project_name}.tex"
 [ -f "${default_name}.acro.tex" ] && mv "${default_name}.acro.tex" "${project_name}.acro.tex"
+[ -f "${default_name}.meta.tex" ] && mv "${default_name}.meta.tex" "${project_name}.meta.tex"
+[ -f "${default_name}.acronyms.tex" ] && mv "${default_name}.acronyms.tex" "${project_name}.acronyms.tex"
 [ -f "${default_name}.bib" ] && mv "${default_name}.bib" "${project_name}.bib"
 
 echo "Creating new repository..."
+exit 0
 svn import -m "new project '${project_name}' (1/2)" . "${url_vcs}/${project_name}" && \
 svn co --force "${url_vcs}/${project_name}" .
 checkError $?
