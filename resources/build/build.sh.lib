@@ -29,7 +29,8 @@ function endLogging() {
 
 function doDefaultProject() {
     if [ "$verify" ] || [ "$build" ] || [ "$quick" ] || \
-       [ "$clean" ] || [ "$spelling" ] || [ "$eval" ] || [ "$generate" ] || [ "$deploy" ] ; then
+       [ "$clean" ] || [ "$spelling" ] || [ "$eval" ] || [ "$generate" ] || [ "$deploy" ] || \
+       [ "$open" ]; then
 
         if [ "$spelling" ]; then
             checkEnvironment "$REQ_APPLICATIONS";
