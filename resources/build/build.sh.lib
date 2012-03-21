@@ -98,6 +98,11 @@ function doDefaultProject() {
               chmod go+r "$DPATH/$NAME.pdf"
             fi
         fi
+        
+        if [ "$open" ]; then
+            NAME=`basename $FILE_MAIN .tex`;
+            open "$NAME.pdf"
+        fi
     else
         showHelp;
     fi;
@@ -106,8 +111,8 @@ function doDefaultProject() {
 function checkParameter() {
   SYNTAX="Syntax: $0 [-c (clean)] [-b (build)] [-q (quick build)] [-v (verify)] \
      [-s (spell checking)] [-e (run the evaluation)] [-g (generate images etc.)] \
-     [-d (deploy)] [-h (help)]";
-  while getopts ":qchvsbegd" optname
+     [-d (deploy)] [-o (open)] [-h (help)]";
+  while getopts ":qchvsbegdo" optname
   do
     case "$optname" in
       "q")
@@ -133,6 +138,9 @@ function checkParameter() {
         ;;
       "d")
         deploy=1;
+        ;;
+      "o")
+        open=1;
         ;;
       "h")
         showHelp;

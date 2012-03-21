@@ -8,6 +8,7 @@ help:
 	@echo " * generate: Generate images (gnuplot, R, dot/graphviz, ...)"
 	@echo " * deploy  : Deploy the PDF file to a directory (e.g. for automated builds)"
 	@echo " * update  : Get the latest sources (incl. latest library)"
+	@echo " * open    : Opens the output file using 'open'"
 
 clean:
 	@./build.sh -c
@@ -30,6 +31,8 @@ eval:
 generate:
 	@./build.sh -g
 
+open:
+	@./build.sh -o
 
 deploy:
 	@./build.sh -d ${DPATH}
