@@ -10,8 +10,12 @@
 
 
 # config ######################################################################
-template_type="Paper" # Paper | Expose | Review | Thesis
-default_name="template" # template | expose | review | thesis_template
+project_name="$1"
+template_type="$2" # Paper | Expose | Review | Thesis
+#default_name="$3" # template | expose | review | thesis_template
+
+#template_type="Paper" # Paper | Expose | Review | Thesis
+#default_name="template" # template | expose | review | thesis_template
 
 vcs_path="publications/"
 wiki_path="Publication/"
@@ -23,7 +27,6 @@ url_wiki="https://svnsrv.fokus.fraunhofer.de/cc/ngni/tub-av/wiki/Guides/Research
 url_template_base="https://svn.github.com/Thesis"
 url_template="${url_template_base}/${template_type}"
 url_lib="https://github.com/Thesis/Core/trunk"
-project_name="$1"
 project_lib="lib"
 ###############################################################################
 
@@ -37,6 +40,8 @@ function checkError {
 
 # input #######################################################################
 [ -z "${project_name}" ] && echo -n "Project name (e.g. 2012ngi): " && read project_name
+[ -z "${template_type}" ] && echo -n "Template type (e.g. Review): " && read template_type
+#[ -z "${default_name}" ] && echo -n "Default file name (e.g. review): " && read default_name
 ###############################################################################
 
 
@@ -52,6 +57,8 @@ svn export "${url_template}" "${project_name}" && cd "${project_name}"
 checkError $?
 
 echo "Cleanup files..."
+source "build.sh.config"
+default_name="$(basename $FILE_MAIN .tex)"
 rm -f "${default_name}.pdf"
 rm -f ".gitmodules"
 rm -f ".gitignore"
@@ -74,7 +81,6 @@ echo "Renaming special files..."
 [ -f "${default_name}.bib" ] && mv "${default_name}.bib" "${project_name}.bib"
 
 echo "Creating new repository..."
-exit 0
 svn import -m "new project '${project_name}' (1/2)" . "${url_vcs}/${project_name}" && \
 svn co --force "${url_vcs}/${project_name}" .
 checkError $?
