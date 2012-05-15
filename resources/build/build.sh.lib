@@ -355,7 +355,9 @@ function checkProject() {
 	if [ "$?" != "0" ]; then _error=1; fi
 	showWarnings;
 	if [ "$?" != "0" ]; then _error=1; fi
-	return $_error
+    # for buildbots return 0
+    return 0
+    #return $_error
     #---------------------------------------------------------------------------
 }
 
