@@ -166,13 +166,13 @@ function checkEnvironment() {
 
     for filename in $_filenames; do
       if [ "`(which $filename; echo $?)|tail -n 1`" != "0" ]; then
-        echo "Please install '$filename' first!";
+        echo "WARNING! The package '$filename' was not found. The build might fail!!";
         _error="1";
       fi;
     done;
-    if [ "$_error" != "0" ]; then
-       exit 1;
-    fi;
+    #if [ "$_error" != "0" ]; then
+    #   exit 1;
+    #fi;
 }
 
 function checkError() {
@@ -473,7 +473,7 @@ function doGraphviz() {
 	startLogging;
 	for gv in `ls $_dir_img/*.gv`; do
         file=${gv##*/}
-        file=${file%%.*}
+                file=${file%%.*}
 		dot -Tps2 -o $_dir_img/$file.ps $gv;
 		ps2pdf $_dir_img/$file.ps $_dir_img/$file.pdf
 		rm $_dir_img/$file.ps
