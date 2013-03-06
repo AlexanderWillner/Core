@@ -52,6 +52,7 @@ function doDefaultProject() {
 
         if [ "$generate" ]; then
             checkEnvironment "$REQ_APPLICATIONS";
+            doPlant "$DIR_IMG";
             doGraphviz "$DIR_IMG";
             doGnuPlot "$DIR_IMG";
             doPlotR "$DIR_IMG";
@@ -472,6 +473,7 @@ function doGraphviz() {
 	_dir_img="$1";
 	errorlevel=0;
 	echo -n "Graphviz...";
+	[ "`ls $_dir_img/*.gv 2>/dev/null`" == "" ] && echo "skipped" && return
 	startLogging;
 	for gv in `ls $_dir_img/*.gv`; do
         file=${gv##*/}
@@ -487,12 +489,29 @@ function doGraphviz() {
 	echo "done";
 }
 
+function doPlant() {
+	_dir_img="$1";
+	errorlevel=0;
+	echo -n "Plant...";
+	[ "`ls $_dir_img/*.plant 2>/dev/null`" == "" ] && echo "skipped" && return
+	startLogging;
+	for plant in `ls $_dir_img/*.plant`; do
+		plantuml $plant;
+		errorlevel=$?
+		if [ "$errorlevel" != "0" ]; then break; fi
+	done
+	endLogging;
+	checkError $errorlevel;
+	echo "done";
+}
+
 function doGnuPlot() {
 	_dir_img="$1";
 	errorlevel=0;
 	echo -n "Gnuplot...";
-	startLogging;
+	[ "`ls $_dir_img/*.gv 2>/dev/null`" == "" ] && echo "skipped" && return
 	cd $_dir_img;
+	startLogging;
 	for plt in `ls *.plt`; do
 		gnuplot $plt;
 		errorlevel=$?
@@ -508,6 +527,7 @@ function doPlotR() {
 	_dir_img="$1";
 	errorlevel=0;
 	echo -n "R...";
+	[ "`ls $_dir_img/*.R 2>/dev/null`" == "" ] && echo "skipped" && return
     startLogging;
     cd $_dir_img;
     for r in `ls *.R`; do
