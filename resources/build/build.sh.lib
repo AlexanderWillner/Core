@@ -495,11 +495,13 @@ function doPlant() {
 	echo -n "Plant...";
 	[ "`ls $_dir_img/*.plant 2>/dev/null`" == "" ] && echo "skipped" && return
 	startLogging;
-	for plant in `ls $_dir_img/*.plant`; do
-		plantuml $plant;
-		errorlevel=$?
-		if [ "$errorlevel" != "0" ]; then break; fi
-	done
+	plantuml $_dir_img/*.plant
+	errorlevel=$?
+#	for plant in `ls $_dir_img/*.plant`; do
+#		plantuml $plant;
+#		errorlevel=$?
+#		if [ "$errorlevel" != "0" ]; then break; fi
+#	done
 	endLogging;
 	checkError $errorlevel;
 	echo "done";
