@@ -33,7 +33,7 @@
 % ------------------------------------------------------------------------------
 
 % File encoding: Normal UTF8
-\IfPackageNotLoaded{CJKutf8}{\usepackage[utf8x]{inputenc}}
+\IfPackageNotLoaded{CJKutf8}{\usepackage[utf8]{inputenc}}
 
 \usepackage{cmap}                     % Support copy and search for pdflatex
 \input{glyphtounicode}                % Support copy and search for pdflatex
@@ -42,8 +42,8 @@
 \usepackage[pdftex,                   % Hyperlinks in PDFs
 raiselinks=true,			          % calculate real height of the link
 breaklinks,                           % break links
-backref=page,                         % backlinks in bibliography (section, slide, page, none)
-pagebackref=true,                     % backlinks in bibliography
+%backref=page,                         % backlinks in bibliography (section, slide, page, none)
+%pagebackref=true,                     % backlinks in bibliography
 hyperindex=true,                      % backlinkex index
 linktocpage=true,                     % ToC links pages
 bookmarks=true,                       % Bookmarks for PDF viewers
@@ -77,7 +77,7 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 {0.31,0.46,.64}                       %
 \definecolor{MarginColor}{rgb}        % Margin color
 {0.31,0.46,.64}                       %
-\renewcommand*{\backref}[1]{[cited at page #1]}% Show formatted backlinks
+%\renewcommand*{\backref}[1]{[cited at page #1]}% Show formatted backlinks
 \usepackage{marginnote}               % Non floating margin notes
 \usepackage[caption=false]{subfig}    % Many figures in one environment
 \usepackage{stfloats}                 % Makes LaTeX honour ‘[b]’ placement
