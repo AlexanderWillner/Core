@@ -405,7 +405,7 @@ function cleanAcronyms() {
     _file_acro="$1";
     echo -n "Sorting acronyms...";
     if [ -e "$_file_acro" ]; then
-        sort -t "$_file_acro"|uniq > "$_file_acro.uniq" && \
+        sort -f "$_file_acro"|uniq > "$_file_acro.uniq" && \
         mv "$_file_acro.uniq" "$_file_acro"
     fi
     echo "done";
