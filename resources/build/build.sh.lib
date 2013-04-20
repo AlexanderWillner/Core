@@ -4,6 +4,11 @@
 #===============================================================================
 
 #===============================================================================
+# Defaults
+#===============================================================================
+[ -e $BIN_BIB ] && BIN_BIB=bibtex
+
+#===============================================================================
 # Method declaration
 #===============================================================================
 function startLogging() {
@@ -444,9 +449,9 @@ function doBibtex() {
     cp *.cls "$_dir_tmp";
     cd "$_dir_tmp";
     file_bibtex=`basename $_file_main .tex`"$_ext";
-    bibtex $file_bibtex;
+    $BIN_BIB $file_bibtex;
     errorlevel=$?
-    found=`bibtex $file_bibtex | grep -iE "warn|illegal|repeated|skipping|couldn't"`
+    found=`$BIN_BIB $file_bibtex | grep -iE "warn|illegal|repeated|skipping|couldn't" | grep -v junk`
     cd -
 	endLogging;
     if [ "$found" != "" ]; then
