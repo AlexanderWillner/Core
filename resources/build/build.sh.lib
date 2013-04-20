@@ -271,7 +271,8 @@ function checkProject() {
 
     echo -n "Checking bibtex...";
     python lib/resources/scripts/bibtex_check.py `basename $_file_main .tex`
-
+	biber -V `basename $_file_main .tex`|grep -Ev "mendeley|INFO"
+	
     echo -n "Checking orthography...";
 	if [ "$DOSPELLCHECK" == "1" ]; then
       for file in `ls $_dir_sources/*.tex`; do
