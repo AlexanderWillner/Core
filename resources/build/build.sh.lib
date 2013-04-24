@@ -81,6 +81,9 @@ function doDefaultProject() {
             	doBibtex "$DIR_TMP" "$FILE_MAIN" "$FILE_BIB" "$DIR_RES";
             fi
         	doLatex "$DIR_TMP" "$FILE_MAIN";
+        	if [ "$DOBIBTEX" == "1" ]; then
+            	doBibtex "$DIR_TMP" "$FILE_MAIN" "$FILE_BIB" "$DIR_RES";
+            fi
         	doLatex "$DIR_TMP" "$FILE_MAIN";
         fi;
 
