@@ -6,7 +6,8 @@
 #===============================================================================
 # Defaults
 #===============================================================================
-[[ -e $BIN_BIB ]] && BIN_BIB=bibtex
+[[ -z $BIN_BIB ]] && BIN_BIB=bibtex
+command -v $BIN_BIB >/dev/null 2>&1 || { echo >&2 "I require $BIN_BIB but it's not installed.  Aborting."; exit 1; }
 
 #===============================================================================
 # Method declaration
