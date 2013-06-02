@@ -1,6 +1,7 @@
 help:
 	@echo " * clean   : Delete temporary files"
 	@echo " * all     : Create the PDF file (run everything needed)"
+	@echo " * full    : Create the PDF file (run LaTeX and BibTeX only)"
 	@echo " * quick   : Update the PDF file (just run LaTeX once)"
 	@echo " * verify  : Run some checks (e.g. l2tabu)"
 	@echo " * spell   : Check for spelling errors (aspell)"
@@ -14,6 +15,9 @@ clean:
 	@./build.sh -c
 
 all: generate
+	@./build.sh -b
+
+full: 
 	@./build.sh -b
 
 quick:
