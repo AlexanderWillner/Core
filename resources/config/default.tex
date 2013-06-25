@@ -93,6 +93,7 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 %\usepackage{lmodern}                  % Nicer fonts (for all)
 \usepackage{ltxtable}                 % Long complex tables
 \usepackage[switch*,modulo]{lineno}   % Show line numbers
+\usepackage{blindtext}                % insert blind texts
 
 \newcommand{\etc}{etc.\@\xspace}      % Fixing some spacing issues
 \lstset{columns=fullflexible}         % Listings in multicolumn mode
@@ -132,8 +133,14 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 }
 
 \newcommand\todo[1]{%
-	\color{grey}
+	\color{red}
 	((todo: #1))
+	\color{black}
+}
+\newcommand\todotext[1]{%
+    \todo{#1}
+	\color{grey}
+	\blindtext
 	\color{black}
 }
 %\setlength{\marginparwidth}{0.7in}
