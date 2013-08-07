@@ -86,6 +86,7 @@ function doDefaultProject() {
             	doBibtex "$DIR_TMP" "$FILE_MAIN" "$FILE_BIB" "$DIR_RES";
             fi
         	doLatex "$DIR_TMP" "$FILE_MAIN";
+        	doLatex "$DIR_TMP" "$FILE_MAIN";
         fi;
 
         if [ "$quick" ] || [ "$build" ]; then
@@ -381,7 +382,8 @@ function showHelp() {
 
 function showWarnings() {
     #WARNINGS=`grep -i warning $FILE_LOG|grep -v ifpdftex`;
-	WARNINGS=`grep -iE "^! |Warning|Overfull|Underfull" $FILE_LOG|grep -vE "addtolists|tocbasic|selectfont|fontenc|pickup@font|scrhack|float@listhead|minitoc|expanded"`;
+	#WARNINGS=`grep -iE "^! |Warning|Overfull|Underfull" $FILE_LOG|grep -vE "addtolists|tocbasic|selectfont|fontenc|pickup@font|scrhack|float@listhead|minitoc|expanded"`;
+	WARNINGS=`grep -iE "^! |Warning" $FILE_LOG|grep -vE "addtolists|tocbasic|selectfont|fontenc|pickup@font|scrhack|float@listhead|minitoc|expanded"`;
 
     if [ "$WARNINGS" != "" ]; then
       echo "-------------";
