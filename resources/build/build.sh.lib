@@ -302,7 +302,7 @@ function checkProject() {
     echo "done";
     echo -n "Checking commas...";
     for file in `ls $_dir_sources/*.tex`; do
-      checkRule "$COMMAS" "$file" "I think we need a comma here: ";
+      checkRule "$COMMAS" "$file" "I think we need a comma here: " true;
       if [ "$?" != "0" ]; then _error=1; fi
     done
     echo "done";
@@ -320,7 +320,7 @@ function checkProject() {
     echo "done";
     echo -n "Checking general...";
     for file in `ls $_dir_sources/*.tex`; do
-      checkRule "$AVOID" "$file" "Avoid";
+      checkRule "$AVOID" "$file" "Avoid" true;
       if [ "$?" != "0" ]; then _error=1; fi
     done
     echo "done";
