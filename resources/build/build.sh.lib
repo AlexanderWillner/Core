@@ -383,7 +383,7 @@ function showHelp() {
 function showWarnings() {
     #WARNINGS=`grep -i warning $FILE_LOG|grep -v ifpdftex`;
 	#WARNINGS=`grep -iE "^! |Warning|Overfull|Underfull" $FILE_LOG|grep -vE "addtolists|tocbasic|selectfont|fontenc|pickup@font|scrhack|float@listhead|minitoc|expanded"`;
-	WARNINGS=`grep -iE "^! |Warning" $FILE_LOG|grep -vE "addtolists|tocbasic|selectfont|fontenc|pickup@font|scrhack|float@listhead|minitoc|expanded"`;
+	WARNINGS=`grep -A2 -B2 -iE "^! |Warning" $FILE_LOG|grep -vE "addtolists|tocbasic|selectfont|fontenc|pickup@font|scrhack|float@listhead|minitoc|expanded"`;
 
     if [ "$WARNINGS" != "" ]; then
       echo "-------------";
