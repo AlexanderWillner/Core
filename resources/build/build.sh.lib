@@ -34,7 +34,7 @@ function endLogging() {
 }
 
 function doDefaultProject() {
-    if [ "$verify" ] || [ "$build" ] || [ "$quick" ] || \
+    if [ "$verify" ] || [ "$build" ] || [ "$quick" ] || [ "$dobibtex" ] || \
        [ "$clean" ] || [ "$spelling" ] || [ "$eval" ] || [ "$generate" ] || [ "$deploy" ] || \
        [ "$open" ]; then
 
@@ -89,6 +89,10 @@ function doDefaultProject() {
         	doLatex "$DIR_TMP" "$FILE_MAIN";
         fi;
 
+    	if [ "$DOBIBTEX" == "1" ]; then
+            doBibtex "$DIR_TMP" "$FILE_MAIN" "$FILE_BIB" "$DIR_RES";
+        fi
+
         if [ "$quick" ] || [ "$build" ]; then
             doLatex "$DIR_TMP" "$FILE_MAIN";
             NAME=`basename $FILE_MAIN .tex`;
@@ -121,10 +125,10 @@ function doDefaultProject() {
 }
 
 function checkParameter() {
-  SYNTAX="Syntax: $0 [-c (clean)] [-b (build)] [-q (quick build)] [-v (verify)] \
+  SYNTAX="Syntax: $0 [-c (clean)] [-b (build)] [-i (bIbtex)] [-q (quick build)] [-v (verify)] \
      [-s (spell checking)] [-e (run the evaluation)] [-g (generate images etc.)] \
      [-d (deploy)] [-o (open)] [-h (help)]";
-  while getopts ":qchvsbegdo" optname
+  while getopts ":qchvsbiegdo" optname
   do
     case "$optname" in
       "q")
@@ -141,6 +145,9 @@ function checkParameter() {
         ;;
       "b")
         build=1;
+        ;;
+      "i")
+        dobibtex=1;
         ;;
       "g")
         generate=1;

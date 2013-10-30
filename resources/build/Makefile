@@ -3,6 +3,7 @@ help:
 	@echo " * all     : Create the PDF file (run everything needed)"
 	@echo " * full    : Create the PDF file (run LaTeX and BibTeX only)"
 	@echo " * quick   : Update the PDF file (just run LaTeX once)"
+	@echo " * bib     : Update the bib file (just run BibTeX/biber once)"
 	@echo " * verify  : Run some checks (e.g. l2tabu)"
 	@echo " * spell   : Check for spelling errors (aspell)"
 	@echo " * eval    : Run evaluation scripts (e.g. R)"
@@ -22,6 +23,9 @@ full:
 
 quick:
 	@./build.sh -q
+
+bib:
+	@./build.sh -i
 
 verify:
 	@./build.sh -v
