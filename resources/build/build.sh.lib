@@ -34,7 +34,7 @@ function endLogging() {
 }
 
 function doDefaultProject() {
-    if [ "$verify" ] || [ "$build" ] || [ "$quick" ] || [ "$dobibtex" ] || \
+    if [ "$verify" ] || [ "$build" ] || [ "$quick" ] || [ "$dobib" ] || \
        [ "$clean" ] || [ "$spelling" ] || [ "$eval" ] || [ "$generate" ] || [ "$deploy" ] || \
        [ "$open" ]; then
 
@@ -89,7 +89,7 @@ function doDefaultProject() {
         	doLatex "$DIR_TMP" "$FILE_MAIN";
         fi;
 
-    	if [ "$DOBIBTEX" == "1" ]; then
+    	if [ "$dobib" == "1" ]; then
             doBibtex "$DIR_TMP" "$FILE_MAIN" "$FILE_BIB" "$DIR_RES";
         fi
 
@@ -147,7 +147,7 @@ function checkParameter() {
         build=1;
         ;;
       "i")
-        dobibtex=1;
+        dobib=1;
         ;;
       "g")
         generate=1;
