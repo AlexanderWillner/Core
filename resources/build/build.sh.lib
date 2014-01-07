@@ -34,7 +34,7 @@ function endLogging() {
 }
 
 function doDefaultProject() {
-    if [ "$verify" ] || [ "$build" ] || [ "$quick" ] || [ "$dobib" ] || \
+    if [ "$verify" ] || [ "$build" ] || [ "$quick" ] || [ "$quicker" ] || [ "$dobib" ] || \
        [ "$clean" ] || [ "$spelling" ] || [ "$eval" ] || [ "$generate" ] || [ "$deploy" ] || \
        [ "$open" ]; then
 
@@ -93,7 +93,11 @@ function doDefaultProject() {
             doBibtex "$DIR_TMP" "$FILE_MAIN" "$FILE_BIB" "$DIR_RES";
         fi
 
-        if [ "$quick" ] || [ "$build" ]; then
+        if [ "$quicker" ]; then
+            doLatex "$DIR_TMP" "$FILE_MAIN";
+        fi;
+
+        if [ "$quick" ] || [ "$quicker" ] || [ "$build" ]; then
             doLatex "$DIR_TMP" "$FILE_MAIN";
             NAME=`basename $FILE_MAIN .tex`;
             if [ "$DOOPT" == "1" ]; then
@@ -125,14 +129,17 @@ function doDefaultProject() {
 }
 
 function checkParameter() {
-  SYNTAX="Syntax: $0 [-c (clean)] [-b (build)] [-i (bIbtex)] [-q (quick build)] [-v (verify)] \
+  SYNTAX="Syntax: $0 [-c (clean)] [-b (build)] [-i (bIbtex)] [-r (quicker build)] [-q (quick build)] [-v (verify)] \
      [-s (spell checking)] [-e (run the evaluation)] [-g (generate images etc.)] \
      [-d (deploy)] [-o (open)] [-h (help)]";
-  while getopts ":qchvsbiegdo" optname
+  while getopts ":qrchvsbiegdo" optname
   do
     case "$optname" in
       "q")
         quick=1;
+        ;;
+      "r")
+        quicker=1;
         ;;
       "c")
         clean=1;
