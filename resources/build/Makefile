@@ -12,6 +12,7 @@ help:
 	@echo " * deploy  : Deploy the PDF file to a directory (e.g. for automated builds)"
 	@echo " * update  : Get the latest sources (incl. latest library)"
 	@echo " * open    : Opens the output file using 'open'"
+	@echo " * ci      : Continuous Integration - watch for changes an rebuild everything"
 
 clean:
 	@./build.sh -c
@@ -48,6 +49,9 @@ open:
 
 deploy:
 	@./build.sh -d ${DPATH}
+
+ci:
+	@./build.sh -f
 
 update:
 	@git submodule foreach git pull origin master

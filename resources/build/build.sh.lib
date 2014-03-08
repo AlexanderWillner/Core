@@ -36,7 +36,16 @@ function endLogging() {
 function doDefaultProject() {
     if [ "$verify" ] || [ "$build" ] || [ "$quick" ] || [ "$quicker" ] || [ "$dobib" ] || \
        [ "$clean" ] || [ "$spelling" ] || [ "$eval" ] || [ "$generate" ] || [ "$deploy" ] || \
-       [ "$open" ]; then
+       [ "$open" ] || [ "$ci" ]; then
+
+        if [ "$ci" ]; then
+            checkEnvironment "$REQ_APPLICATIONS";
+            checkEnvironment "fswatch";
+            dirs="$DIR_SRC:$DIR_IMG"
+            echo "Waiting for changes in '$dirs'";
+            fswatch "$dirs" make quick open
+        	exit $?;
+        fi;
 
         if [ "$spelling" ]; then
             checkEnvironment "$REQ_APPLICATIONS";
@@ -131,8 +140,8 @@ function doDefaultProject() {
 function checkParameter() {
   SYNTAX="Syntax: $0 [-c (clean)] [-b (build)] [-i (bIbtex)] [-r (quicker build)] [-q (quick build)] [-v (verify)] \
      [-s (spell checking)] [-e (run the evaluation)] [-g (generate images etc.)] \
-     [-d (deploy)] [-o (open)] [-h (help)]";
-  while getopts ":qrchvsbiegdo" optname
+     [-d (deploy)] [-o (open)] [-f (continuous integration)] [-h (help)]";
+  while getopts ":qrchvsbiegdfo" optname
   do
     case "$optname" in
       "q")
@@ -167,6 +176,9 @@ function checkParameter() {
         ;;
       "o")
         open=1;
+        ;;
+      "f")
+        ci=1;
         ;;
       "h")
         showHelp;
