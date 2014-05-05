@@ -274,6 +274,7 @@ function checkSpellingInteractive() {
 	_dir_sources="$1";
 	_dir_resources="$2";
 	_language="$3";
+
     for filename in `ls $_dir_sources`; do
       aspell --home-dir=$_dir_resources \
         --lang=$_language \
