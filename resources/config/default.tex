@@ -69,7 +69,7 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 %\usepackage{lmodern}                 % Nicer fonts (for all)
 \usepackage{ltxtable}                 % Long complex tables
 \usepackage[switch*,modulo]{lineno}   % Show line numbers
-\usepackage{blindtext}                % insert blind texts
+\usepackage[pangram]{blindtext}       % insert blind texts
 \usepackage{cleveref}                 % To ref footnotes twice
 \crefformat{footnote}{#2\footnotemark[#1]#3}
 
@@ -132,7 +132,13 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 \newcommand\todotext[1]{%
     \todo{#1}%
 	\color[gray]{0.8}%
-	\blindtext%
+	\blindtext[1]%
+	\color{black}%
+}
+\newcommand\todosmall[1]{%
+    \todo{#1}%
+	\color[gray]{0.8}%
+	Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Etiam lobortis facilisis sem. Nullam nec mi et neque pharetra sollicitudin. Praesent imperdiet mi nec ante.%
 	\color{black}%
 }
 %\setlength{\marginparwidth}{0.7in}
@@ -145,8 +151,8 @@ protrusion=true]{microtype}           % Fonts: margin kerning
     %\begin{turn}{270}%
       \emph{#1}%
     %\end{turn}%
-  }
-}
+  }%
+}%
 
 %for two-column layout
 \makeatletter
