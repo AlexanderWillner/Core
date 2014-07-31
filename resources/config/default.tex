@@ -75,8 +75,10 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 
 \newcommand{\etc}{etc.\@\xspace}      % Fixing some spacing issues
 \lstset{columns=fullflexible,         % Listings in multicolumn mode
-        breaklines=true}              % Listings with long lines
-
+        breaklines=true,              % Listings with long lines
+        xleftmargin=3em,              % Correct indentation
+        basicstyle=\scriptsize        % Small text
+        }
 % To be used in the project specific config file:
 %\usepackage[bf]{caption}[2008/08/24]  % Bold caption (better contrast)
 %\usepackage{acronym}                  % For acronyms
