@@ -41,7 +41,7 @@ function doDefaultProject() {
         if [ "$ci" ]; then
             checkEnvironment "$REQ_APPLICATIONS";
             checkEnvironment "fswatch";
-            dirs="$DIR_SRC:$DIR_IMG"
+            dirs="$DIR_SRC:$DIR_IMG:$DIR_BLD"
             echo "Waiting for changes in '$dirs'";
             fswatch "$dirs" make quick open
         	exit $?;
