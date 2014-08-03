@@ -43,6 +43,7 @@ function doDefaultProject() {
             checkEnvironment "fswatch";
             dirs="$DIR_SRC:$DIR_IMG:$DIR_BLD"
             echo "Waiting for changes in '$dirs'";
+            export BACK=1
             fswatch "$dirs" make quick open
         	exit $?;
         fi;
@@ -83,19 +84,19 @@ function doDefaultProject() {
 
         if [ "$build" ]; then
                 cleanAcronyms "$FILE_ACRO"
-        	doLatex "$DIR_TMP" "$FILE_MAIN";
+        	doLatex "$DIR_TMP" "$FILE_MAIN" "-draftmode";
         	if [ "$DOINDEX" == "1" ]; then
         		doIndex "$DIR_TMP" "$DIR_LYT";
         	fi
         	if [ "$DOBIBTEX" == "1" ]; then
             	doBibtex "$DIR_TMP" "$FILE_MAIN" "$FILE_BIB" "$DIR_RES";
             fi
-        	doLatex "$DIR_TMP" "$FILE_MAIN";
+        	doLatex "$DIR_TMP" "$FILE_MAIN" "-draftmode";
         	if [ "$DOBIBTEX" == "1" ]; then
             	doBibtex "$DIR_TMP" "$FILE_MAIN" "$FILE_BIB" "$DIR_RES";
             fi
-        	doLatex "$DIR_TMP" "$FILE_MAIN";
-        	doLatex "$DIR_TMP" "$FILE_MAIN";
+        	doLatex "$DIR_TMP" "$FILE_MAIN" "-draftmode";
+        	doLatex "$DIR_TMP" "$FILE_MAIN" "-draftmode";
         fi;
 
     	if [ "$dobib" == "1" ]; then
@@ -103,7 +104,7 @@ function doDefaultProject() {
         fi
 
         if [ "$quicker" ]; then
-            doLatex "$DIR_TMP" "$FILE_MAIN";
+        	doLatex "$DIR_TMP" "$FILE_MAIN" "-draftmode";
         fi;
 
         if [ "$quick" ] || [ "$quicker" ] || [ "$build" ]; then
@@ -130,7 +131,11 @@ function doDefaultProject() {
         
         if [ "$open" ]; then
             NAME=`basename $FILE_MAIN .tex`;
-            open "$NAME.pdf"
+            if [ "$BACK" == "1" ]; then
+                open -g "$NAME.pdf"
+            else
+                open "$NAME.pdf"
+            fi
         fi
     else
         showHelp;
@@ -458,9 +463,11 @@ function cleanAcronyms() {
 function doLatex() {
 	_dir_tmp="$1";
 	_file_main="$2";
+	_option="$3";
 	echo -n "Running LaTeX...";
     startLogging;
     pdflatex \
+      $_option \
 	  -interaction=nonstopmode \
 	   -file-line-error \
 	  -output-directory $_dir_tmp \
