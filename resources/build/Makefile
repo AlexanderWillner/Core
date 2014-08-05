@@ -13,6 +13,7 @@ help:
 	@echo " * update  : Get the latest sources (incl. latest library)"
 	@echo " * open    : Opens the output file using 'open'"
 	@echo " * ci      : Continuous Integration - watch for changes an rebuild everything"
+	@echo " * unicode : Find incompatible unicode characters"
 
 clean:
 	@./build.sh -c
@@ -52,6 +53,9 @@ deploy:
 
 ci:
 	@./build.sh -f
+
+unicode:
+	@./build.sh -u
 
 update:
 	@git submodule foreach git pull origin master

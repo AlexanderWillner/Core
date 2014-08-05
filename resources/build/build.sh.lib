@@ -36,7 +36,12 @@ function endLogging() {
 function doDefaultProject() {
     if [ "$verify" ] || [ "$build" ] || [ "$quick" ] || [ "$quicker" ] || [ "$dobib" ] || \
        [ "$clean" ] || [ "$spelling" ] || [ "$eval" ] || [ "$generate" ] || [ "$deploy" ] || \
-       [ "$open" ] || [ "$ci" ]; then
+       [ "$open" ] || [ "$ci" ] || [ "$unicode" ]; then
+
+
+        if [ "$unicode" ]; then
+            checkUnicode "$DIR_SRC"
+        fi;
 
         if [ "$ci" ]; then
             checkEnvironment "$REQ_APPLICATIONS";
@@ -140,8 +145,8 @@ function doDefaultProject() {
 function checkParameter() {
   SYNTAX="Syntax: $0 [-c (clean)] [-b (build)] [-i (bIbtex)] [-r (quicker build)] [-q (quick build)] [-v (verify)] \
      [-s (spell checking)] [-e (run the evaluation)] [-g (generate images etc.)] \
-     [-d (deploy)] [-o (open)] [-f (continuous integration)] [-h (help)]";
-  while getopts ":qrchvsbiegdfo" optname
+     [-d (deploy)] [-o (open)] [-f (continuous integration)] [-u (unicode check)] [-h (help)]";
+  while getopts ":qrchvsbiegdfou" optname
   do
     case "$optname" in
       "q")
@@ -180,6 +185,9 @@ function checkParameter() {
       "f")
         ci=1;
         ;;
+      "u")
+        unicode=1;
+        ;;
       "h")
         showHelp;
         exit;
@@ -195,6 +203,15 @@ function checkParameter() {
         ;;
     esac
   done
+}
+
+function checkUnicode() {
+	_dir_sources="$1";
+    _pcreExists=$(command -v pcregrep >/dev/null 2>&1 && echo 1)
+    if [ $_pcreExists ]; then _cmd="pcregrep"; else _cmd="grep"; fi
+
+	find ${_dir_sources} -iname "*.tex" -exec \
+	  $_cmd -H --color='auto' -n "[\x80-\xFF]" {} \;
 }
 
 function checkEnvironment() {
@@ -305,6 +322,9 @@ function checkProject() {
     python lib/resources/scripts/bibtex_check.py `basename $_file_main .tex`
 	biber -V `basename $_file_main .tex`|grep -Ev "mendeley|INFO"
 	
+    echo "Checking unicode...";
+    checkUnicode $_dir_sources/
+    
     echo -n "Checking orthography...";
 	if [ "$DOSPELLCHECK" == "1" ]; then
       for file in `ls $_dir_sources/*.tex`; do
