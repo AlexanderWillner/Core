@@ -34,9 +34,24 @@ function endLogging() {
 }
 
 function doDefaultProject() {
-    if [ "$verify" ] || [ "$build" ] || [ "$quick" ] || [ "$dobib" ] || \
+    if [ "$verify" ] || [ "$build" ] || [ "$quick" ] || [ "$quicker" ] || [ "$dobib" ] || \
        [ "$clean" ] || [ "$spelling" ] || [ "$eval" ] || [ "$generate" ] || [ "$deploy" ] || \
-       [ "$open" ]; then
+       [ "$open" ] || [ "$ci" ] || [ "$unicode" ]; then
+
+
+        if [ "$unicode" ]; then
+            checkUnicode "$DIR_SRC"
+        fi;
+
+        if [ "$ci" ]; then
+            checkEnvironment "$REQ_APPLICATIONS";
+            checkEnvironment "fswatch";
+            dirs="$DIR_SRC:$DIR_IMG:$DIR_BLD"
+            echo "Waiting for changes in '$dirs'";
+            export BACK=1
+            fswatch "$dirs" make quick open
+        	exit $?;
+        fi;
 
         if [ "$spelling" ]; then
             checkEnvironment "$REQ_APPLICATIONS";
@@ -74,26 +89,30 @@ function doDefaultProject() {
 
         if [ "$build" ]; then
                 cleanAcronyms "$FILE_ACRO"
-        	doLatex "$DIR_TMP" "$FILE_MAIN";
+        	doLatex "$DIR_TMP" "$FILE_MAIN" "-draftmode";
         	if [ "$DOINDEX" == "1" ]; then
         		doIndex "$DIR_TMP" "$DIR_LYT";
         	fi
         	if [ "$DOBIBTEX" == "1" ]; then
             	doBibtex "$DIR_TMP" "$FILE_MAIN" "$FILE_BIB" "$DIR_RES";
             fi
-        	doLatex "$DIR_TMP" "$FILE_MAIN";
+        	doLatex "$DIR_TMP" "$FILE_MAIN" "-draftmode";
         	if [ "$DOBIBTEX" == "1" ]; then
             	doBibtex "$DIR_TMP" "$FILE_MAIN" "$FILE_BIB" "$DIR_RES";
             fi
-        	doLatex "$DIR_TMP" "$FILE_MAIN";
-        	doLatex "$DIR_TMP" "$FILE_MAIN";
+        	doLatex "$DIR_TMP" "$FILE_MAIN" "-draftmode";
+        	doLatex "$DIR_TMP" "$FILE_MAIN" "-draftmode";
         fi;
 
     	if [ "$dobib" == "1" ]; then
             doBibtex "$DIR_TMP" "$FILE_MAIN" "$FILE_BIB" "$DIR_RES";
         fi
 
-        if [ "$quick" ] || [ "$build" ]; then
+        if [ "$quicker" ]; then
+        	doLatex "$DIR_TMP" "$FILE_MAIN" "-draftmode";
+        fi;
+
+        if [ "$quick" ] || [ "$quicker" ] || [ "$build" ]; then
             doLatex "$DIR_TMP" "$FILE_MAIN";
             NAME=`basename $FILE_MAIN .tex`;
             if [ "$DOOPT" == "1" ]; then
@@ -117,7 +136,11 @@ function doDefaultProject() {
         
         if [ "$open" ]; then
             NAME=`basename $FILE_MAIN .tex`;
-            open "$NAME.pdf"
+            if [ "$BACK" == "1" ]; then
+                open -g "$NAME.pdf"
+            else
+                open "$NAME.pdf"
+            fi
         fi
     else
         showHelp;
@@ -125,14 +148,17 @@ function doDefaultProject() {
 }
 
 function checkParameter() {
-  SYNTAX="Syntax: $0 [-c (clean)] [-b (build)] [-i (bIbtex)] [-q (quick build)] [-v (verify)] \
+  SYNTAX="Syntax: $0 [-c (clean)] [-b (build)] [-i (bIbtex)] [-r (quicker build)] [-q (quick build)] [-v (verify)] \
      [-s (spell checking)] [-e (run the evaluation)] [-g (generate images etc.)] \
-     [-d (deploy)] [-o (open)] [-h (help)]";
-  while getopts ":qchvsbiegdo" optname
+     [-d (deploy)] [-o (open)] [-f (continuous integration)] [-u (unicode check)] [-h (help)]";
+  while getopts ":qrchvsbiegdfou" optname
   do
     case "$optname" in
       "q")
         quick=1;
+        ;;
+      "r")
+        quicker=1;
         ;;
       "c")
         clean=1;
@@ -161,6 +187,12 @@ function checkParameter() {
       "o")
         open=1;
         ;;
+      "f")
+        ci=1;
+        ;;
+      "u")
+        unicode=1;
+        ;;
       "h")
         showHelp;
         exit;
@@ -176,6 +208,15 @@ function checkParameter() {
         ;;
     esac
   done
+}
+
+function checkUnicode() {
+	_dir_sources="$1";
+    _pcreExists=$(command -v pcregrep >/dev/null 2>&1 && echo 1)
+    if [ $_pcreExists ]; then _cmd="pcregrep"; else _cmd="grep -P"; fi
+
+	find ${_dir_sources} -iname "*.tex" -exec \
+	  $_cmd -H --color='auto' -n "[\x80-\xFF]" {} \;
 }
 
 function checkEnvironment() {
@@ -197,8 +238,8 @@ function checkError() {
     _exitcode="$1";
 	_exit="$2";
     if [ "$_exitcode" != "0" ]; then
-        echo "Error: Command failed. See $FILE_LOG.";
-        exit $_exitcode
+        echo "WARNING: Command failed. The build might fail!! See $FILE_LOG.";
+        #exit $_exitcode
     fi
 }
 
@@ -255,6 +296,7 @@ function checkSpellingInteractive() {
 	_dir_sources="$1";
 	_dir_resources="$2";
 	_language="$3";
+
     for filename in `ls $_dir_sources`; do
       aspell --home-dir=$_dir_resources \
         --lang=$_language \
@@ -285,6 +327,9 @@ function checkProject() {
     python lib/resources/scripts/bibtex_check_0.2.0.py `basename $_file_main .tex`
 	biber --tool -V `basename $_file_main .tex`|grep -Ev "mendeley|INFO"
 	
+    echo "Checking unicode...";
+    checkUnicode $_dir_sources/
+    
     echo -n "Checking orthography...";
 	if [ "$DOSPELLCHECK" == "1" ]; then
       for file in `ls $_dir_sources/*.tex`; do
@@ -415,10 +460,10 @@ function doCleanup() {
     echo -n "Cleaning up...";
 	rm -rf "$_dir_tmp" 2> /dev/null;
     if [ "$isNotGnu" == "1" ]; then
-      find . -path '*.git' -prune -o -regex ".*\.\(brf\|bak\|aux\|bbl\|blg\|idx\|out\|new\|lot\|lof\|toc\|log\|ilg\|gls\|glo\|ind\|slg\|syg\|lol\|syi\|maf\|bcf\|spl\|glg\|xdy\|glsdefs\|mtc.*\)$" -exec rm {} \;
+      find . -path '*.git' -prune -o -regex ".*\.\(brf\|bak\|aux\|bbl\|blg\|idx\|out\|new\|lot\|loa\|lof\|toc\|log\|ilg\|gls\|glo\|ind\|slg\|syg\|lol\|syi\|maf\|bcf\|spl\|glg\|xdy\|glsdefs\|mtc.*\)$" -exec rm {} \;
       find . -path '*.git' -prune -o -regex ".*-blx\.bib\|.*\.run\.xml$" -exec rm {} \;
     else
-      find -E . -path '*.git' -prune -o -regex ".*\.(brf|bak|aux|bbl|blg|idx|out|new|lot|lof|toc|log|ilg|ind|gls|glo|slg|syg|syi|lol|maf|spl|glg|xdy|glsdefs|bcf|mtc.*)$" -exec rm {} \;
+      find -E . -path '*.git' -prune -o -regex ".*\.(brf|bak|aux|bbl|blg|idx|out|new|lot|loa|lof|toc|log|ilg|ind|gls|glo|slg|syg|syi|lol|maf|spl|glg|xdy|glsdefs|bcf|mtc.*)$" -exec rm {} \;
       find -E . -path '*.git' -prune -o -regex ".*-blx\.bib|.*\.run\.xml$" -exec rm {} \;
     fi
     echo "done";
@@ -438,9 +483,11 @@ function cleanAcronyms() {
 function doLatex() {
 	_dir_tmp="$1";
 	_file_main="$2";
+	_option="$3";
 	echo -n "Running LaTeX...";
     startLogging;
     pdflatex \
+      $_option \
 	  -interaction=nonstopmode \
 	   -file-line-error \
 	  -output-directory $_dir_tmp \
@@ -600,7 +647,7 @@ COMMAS="However\s+#In fact\s+#Therefore\s+#Nevertheless\s+#Moreover\s+#Furthermo
 REFS='[^\\]section[^A-Za-z\.,;\}\(]+\\#figure[^A-Za-z\.,;\}\(]+\\#equation[^A-Za-z\.,;\}\(]+\\#table[^A-Za-z\.,;\}\(]+\\';
 MISTAKES='test bed#test-bed';
 MISTAKES_CS='\bwebservice\b#\bweb service\b#\bMiddleware\b#\bArgon[^:]\b#\binternet\b';
-AVOID="clearly#obviously#actually#\$i-th\$#etc\.#\.e\.#e\.g\.[^,]#[^,]\s{,1}respectively#Therefore[^,]#thus[^,]#related works#following (figure\b|fig\.)#[^~](\s*)\\\ref#kbps#mbps#msec#recent advances in# don't#doesn't#we've#won't#it's#That's because#optimally#Equation(~|\s*)\\\ref#\still\s#make assumption#is a function of#is an illustration#is a requirement#utilizes#had difference#\\\$[0-9]+\\\$#\\\cite{.*}\\s\\\cite#\bgut\b#\bschlecht\b#\bschön\b#\bfurchtbar\b#\bdumm\b#\bwahr\b#\bfalsch\b#\bperfekt\b#\bideal\b#\bheutzutage\b#\bmodern\b#\bbald\b#\büberrascht\b#\bscheint\b#\bbasiert\b#\bviele\b#\beinige\b#\bähnlich\b#\bwahrscheinlich\b#\bselbstverständlich\b#\bklar\b#\bwirklich\b#\beinfach\b#\bdieses\b#\bjenes\b#\bwir\b#\bhoffentlich\b#\bbekannt\b#\bberühmt\b#\bmuss\b#\bman\b#\b\bhalt\b\b#\bimmer\b#\bsollte\b#\bbeweis\b#\bzeigt\b#\bkann\b#\bsollte\b#\bmüsste\b#\bsoon\b#\bbald\b#\bperfect\b#\bperfekt\b#\bseems\b#\bscheint\b#\blots of\b#\bkind of\b#\btype of\b#\bsomethink like\b#\bprobably\b#\balong with\b#\bwould seem to show\b#\ban ideal solution\b#\bbad\b#\bnice\b#\bstupid\b#\bmodern times\b#\btoday\b#\ba famous researcher\b#\bsimple\b#z\.B\.#d\.h\.#z\.Z\.#u\.a\."
+AVOID="clearly#obviously#actually#\$i-th\$#etc\.#\.e\.#e\.g\.[^,]#[^,]\s{,1}respectively#Therefore[^,]#thus[^,]#related works#following (figure\b|fig\.)#[^~](\s*)\\\ref#kbps#mbps#msec#recent advances in# don't#doesn't#we've#won't#it's#That's because#optimally#Equation(~|\s*)\\\ref#\still\s#make assumption#is a function of#is an illustration#is a requirement#utilizes#had difference#\\\$[0-9]+\\\$#\\\cite{.*}\\s\\\cite#\bgut\b#\bschlecht\b#\bschön\b#\bfurchtbar\b#\bdumm\b#\bwahr\b#\bfalsch\b#\bperfekt\b#\bideal\b#\bheutzutage\b#\bmodern\b#\bbald\b#\büberrascht\b#\bscheint\b#\bbasiert\b#\bviele\b#\beinige\b#\bähnlich\b#\bwahrscheinlich\b#\bselbstverständlich\b#\bklar\b#\bwirklich\b#\beinfach\b#\bdieses\b#\bjenes\b#\bwir\b#\bhoffentlich\b#\bbekannt\b#\bberühmt\b#\bmuss\b#\bman\b#\b\bhalt\b\b#\bimmer\b#\bsollte\b#\bbeweis\b#\bzeigt\b#\bkann\b#\bsollte\b#\bmüsste\b#\bsoon\b#\bbald\b#\bperfect\b#\bperfekt\b#\bseems\b#\bscheint\b#\blots of\b#\bkind of\b#\btype of\b#\bsomethink like\b#\bprobably\b#\balong with\b#\bwould seem to show\b#\ban ideal solution\b#\bbad\b#\bnice\b#\bstupid\b#\bmodern times\b#\btoday\b#\ba famous researcher\b#\bsimple\b#z\.B\.#d\.h\.#z\.Z\.#u\.a\.#\\\caption.*\\\ac"
 MACROS="\bPreface\b#\bVorwort\b#\bReferences\b#\bLiteratur\b#\bBibliography\b#\bLiteraturverzeichnis\b#\bAppendix\b#\bAnhang\b#\bContents\b#\bInhaltsverzeichnis\b#\bList of Figures\b#\bAbbildungsverzeichnis\b#\bList of Tables\b#\bTabellenverzeichnis\b#\bFigure|Fig\.[^A-Za-z\.,;]+#\bAbbildung|Abb\.[^A-Za-z\.,;]+#\bTable|Tab\.[^A-Za-z\.,;]+#\bTabelle[^A-Za-z\.,;]+#\bEquation|Eq\.[^A-Za-z\.,;]+#\bSection|Seq\.[^A-Za-z\.,;]+#\bPart\b#\bTeil\b#\bencl\b#\bAnlage(n)\b#\bVerteiler\b#\bPage\b#\bSeite\b#\bsee also\b#\bsiehe auch\b";
 BAD_ABSTRACT="\cite#\equation#in this paper";
 BAD_INTRO="recent advances in#growth of the Internet";
