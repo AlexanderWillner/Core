@@ -36,8 +36,12 @@ function endLogging() {
 function doDefaultProject() {
     if [ "$verify" ] || [ "$build" ] || [ "$quick" ] || [ "$quicker" ] || [ "$dobib" ] || \
        [ "$clean" ] || [ "$spelling" ] || [ "$eval" ] || [ "$generate" ] || [ "$deploy" ] || \
-       [ "$open" ] || [ "$ci" ] || [ "$unicode" ]; then
+       [ "$open" ] || [ "$ci" ] || [ "$unicode" ] || [ "$optimize" ]; then
 
+
+        if [ "$optimize" ]; then
+            optimize "$DIR_IMG"
+        fi;
 
         if [ "$unicode" ]; then
             checkUnicode "$DIR_SRC"
@@ -150,8 +154,9 @@ function doDefaultProject() {
 function checkParameter() {
   SYNTAX="Syntax: $0 [-c (clean)] [-b (build)] [-i (bIbtex)] [-r (quicker build)] [-q (quick build)] [-v (verify)] \
      [-s (spell checking)] [-e (run the evaluation)] [-g (generate images etc.)] \
-     [-d (deploy)] [-o (open)] [-f (continuous integration)] [-u (unicode check)] [-h (help)]";
-  while getopts ":qrchvsbiegdfou" optname
+     [-d (deploy)] [-o (open)] [-f (continuous integration)] [-u (unicode check)] \
+     [-z (optimize)] [-h (help)]";
+  while getopts ":qrchvsbiegdfouz" optname
   do
     case "$optname" in
       "q")
@@ -193,6 +198,9 @@ function checkParameter() {
       "u")
         unicode=1;
         ;;
+      "z")
+        optimize=1;
+        ;;
       "h")
         showHelp;
         exit;
@@ -208,6 +216,18 @@ function checkParameter() {
         ;;
     esac
   done
+}
+
+function optimize() {
+	_dir_resources="$1";
+
+    checkEnvironment optipng
+	find ${_dir_resources} -iname "*.png" -exec \
+	  optipng {} \;
+
+    checkEnvironment jpegoptim
+	find ${_dir_resources} -iname "*.jpg" -exec \
+	  jpegoptim -o -p {} \;
 }
 
 function checkUnicode() {
