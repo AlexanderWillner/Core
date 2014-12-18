@@ -488,6 +488,7 @@ function doLatex() {
     startLogging;
     pdflatex \
       $_option \
+	  -shell-escape \
 	  -interaction=nonstopmode \
 	   -file-line-error \
 	  -output-directory $_dir_tmp \
