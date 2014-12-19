@@ -5,6 +5,8 @@ BibTeX check on missing fields and consistent name conventions (no BibTeX valida
 especially developed for requirements in Computer Science. 
 """
 
+import sys, getopt
+
 __author__ = "Fabian Beck"
 __version__ = "0.2.0"
 __license__ = "MIT"
@@ -13,9 +15,22 @@ __license__ = "MIT"
 # Properties (please change according to your needs)
 ####################################################################
 
-# files
 bibFile = "test.bib"
-auxFile = "test.aux"                # use "" to deactivate restricting the check to the entries listed in the aux file
+auxFile = "test.aux"
+try:
+    opts, args = getopt.getopt(sys.argv[1:],"hi:a:")
+except getopt.GetoptError:
+    print ('bibtex_check_0.2.0.py -i <inputfile> -a <auxfile>')
+    sys.exit(2)
+for opt, arg in opts:
+      if opt == '-h':
+         print ('bibtex_check_0.2.0.py -i <inputfile> -a <auxfile>')
+         sys.exit()
+      elif opt in ("-i"):
+         bibFile = arg
+      elif opt in ("-a"):
+         auxFile = arg      
+# files
 htmlOutput = "bibtex_check.html"
 
 # links
