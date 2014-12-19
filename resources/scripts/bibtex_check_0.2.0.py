@@ -16,7 +16,7 @@ __license__ = "MIT"
 ####################################################################
 
 bibFile = "test.bib"
-auxFile = "test.aux"
+auxFile = ""
 try:
     opts, args = getopt.getopt(sys.argv[1:],"hi:a:")
 except getopt.GetoptError:

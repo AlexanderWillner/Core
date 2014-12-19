@@ -345,7 +345,7 @@ function checkProject() {
 
     echo -n "Checking bibtex...";
     python3 lib/resources/scripts/bibtex_check_0.2.0.py -i `basename $_file_main .tex`.bib
-	biber --tool -V `basename $_file_main .tex`|grep -Ev "mendeley|INFO"
+	biber -T -V `basename $_file_main .tex`|grep -Ev "mendeley|INFO"
 	
     echo "Checking unicode...";
     checkUnicode $_dir_sources/
