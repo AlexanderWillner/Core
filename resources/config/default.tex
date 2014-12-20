@@ -194,10 +194,9 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 % annotations --------------------------------------------------------------
 
 % more listings ------------------------------------------------------------
-\definecolor{olivegreen}{rgb}{0.2,0.8,0.5}
 \definecolor{grey}{rgb}{0.5,0.5,0.5}
 \lstdefinelanguage{sparql}{
-morecomment=[l][\color{olivegreen}]{\#},
+morecomment=[l][\color{red}]{\#},
 morestring=[b][\color{blue}]\",
 morekeywords={SELECT,CONSTRUCT,DESCRIBE,ASK,WHERE,FROM,NAMED,PREFIX,BASE,OPTIONAL,FILTER,GRAPH,LIMIT,OFFSET,SERVICE,UNION,EXISTS,NOT,BINDINGS,MINUS,a},
 sensitive=true
@@ -205,7 +204,7 @@ sensitive=true
 \lstdefinelanguage{ttl}{
 sensitive=true,
 morecomment=[l][\color{grey}]{@},
-morecomment=[l][\color{olivegreen}]{\#},
+morecomment=[l][\color{red}]{\#},
 morestring=[b][\color{blue}]\",
 }
 
