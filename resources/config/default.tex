@@ -125,6 +125,22 @@ protrusion=true]{microtype}           % Fonts: margin kerning
     }
 }
 
+\newcommand\aclc[1]{%
+    {%
+	\renewcommand{\url}[1]{}%
+    \renewcommand{\footnote}[1]{}%
+    \renewcommand{\cite}[1]{}%
+    \acl*{#1}
+	}%
+}
+\newcommand\acfc[1]{%
+    {%
+	\renewcommand{\url}[1]{}%
+    \renewcommand{\footnote}[1]{}%
+    \renewcommand{\cite}[1]{}%
+    \acf*{#1}
+	}%
+}
 \newcommand\todoremark[1]{%
 	\color{blue}%
 	((remark: #1))
