@@ -235,7 +235,7 @@ function checkUnicode() {
     _pcreExists=$(command -v pcregrep >/dev/null 2>&1 && echo 1)
     if [ $_pcreExists ]; then _cmd="pcregrep"; else _cmd="grep -P"; fi
 
-	find ${_dir_sources} -iname "*.tex" -exec \
+	find ${_dir_sources}  \( -iname "*.tex" -o -iname "*.txt" \)  -exec \
 	  $_cmd -H --color='auto' -n "[\x80-\xFF]" {} \;
 }
 
