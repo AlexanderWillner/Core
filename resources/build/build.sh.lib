@@ -235,7 +235,7 @@ function checkUnicode() {
     _pcreExists=$(command -v pcregrep >/dev/null 2>&1 && echo 1)
     if [ $_pcreExists ]; then _cmd="pcregrep"; else _cmd="grep -P"; fi
 
-	find ${_dir_sources} -iname "*.tex" -exec \
+	find ${_dir_sources}  \( -iname "*.tex" -o -iname "*.txt" \)  -exec \
 	  $_cmd -H --color='auto' -n "[\x80-\xFF]" {} \;
 }
 
@@ -481,10 +481,10 @@ function doCleanup() {
 	rm -rf "$_dir_tmp" 2> /dev/null;
     if [ "$isNotGnu" == "1" ]; then
       find . -path '*.git' -prune -o -regex ".*\.\(brf\|bak\|aux\|bbl\|blg\|idx\|out\|new\|lot\|loa\|lof\|toc\|log\|ilg\|gls\|glo\|ind\|slg\|syg\|lol\|syi\|maf\|bcf\|spl\|glg\|xdy\|glsdefs\|mtc.*\)$" -exec rm {} \;
-      find . -path '*.git' -prune -o -regex ".*-blx\.bib\|.*\.run\.xml$" -exec rm {} \;
+      find . -path '*.git' -prune -o -regex ".*-blx\.bib\|.*bibtex_check\.html\|.*\.run\.xml$" -exec rm {} \;
     else
       find -E . -path '*.git' -prune -o -regex ".*\.(brf|bak|aux|bbl|blg|idx|out|new|lot|loa|lof|toc|log|ilg|ind|gls|glo|slg|syg|syi|lol|maf|spl|glg|xdy|glsdefs|bcf|mtc.*)$" -exec rm {} \;
-      find -E . -path '*.git' -prune -o -regex ".*-blx\.bib|.*\.run\.xml$" -exec rm {} \;
+      find -E . -path '*.git' -prune -o -regex ".*-blx\.bib|.*bibtex_check\.html|.*\.run\.xml$" -exec rm {} \;
     fi
     echo "done";
 }

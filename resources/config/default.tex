@@ -125,6 +125,24 @@ protrusion=true]{microtype}           % Fonts: margin kerning
     }
 }
 
+\newcommand\aclc[1]{%
+{%
+\renewcommand{\url}[1]{}%
+\renewcommand{\footnote}[1]{}%
+\renewcommand{\cite}[1]{}%
+\let\protect\relax%
+\acl*{#1}%
+}%
+}
+\newcommand\acfc[1]{%
+{%
+\renewcommand{\url}[1]{}%
+\renewcommand{\footnote}[1]{}%
+\renewcommand{\cite}[1]{}%
+\let\protect\relax%
+\acf*{#1}%
+}%
+}
 \newcommand\todoremark[1]{%
 	\color{blue}%
 	((remark: #1))
@@ -199,16 +217,16 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 % more listings ------------------------------------------------------------
 \definecolor{grey}{rgb}{0.5,0.5,0.5}
 \lstdefinelanguage{sparql}{
-morecomment=[l][\color{red}]{\#},
-morestring=[b][\color{blue}]\",
+morecomment=[l][\color{black}]{\#},
+morestring=[b][\color{black}]\",
 morekeywords={SELECT,CONSTRUCT,DESCRIBE,ASK,WHERE,FROM,NAMED,PREFIX,BASE,OPTIONAL,FILTER,GRAPH,LIMIT,OFFSET,SERVICE,UNION,EXISTS,NOT,BINDINGS,MINUS,a},
 sensitive=true
 }
 \lstdefinelanguage{ttl}{
 sensitive=true,
 morecomment=[l][\color{grey}]{@},
-morecomment=[l][\color{red}]{\#},
-morestring=[b][\color{blue}]\",
+morecomment=[l][\color{black}]{\#},
+morestring=[b][\color{black}]\",
 }
 
 % more listings ------------------------------------------------------------
