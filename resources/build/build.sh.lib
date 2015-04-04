@@ -36,8 +36,11 @@ function endLogging() {
 function doDefaultProject() {
     if [ "$verify" ] || [ "$build" ] || [ "$quick" ] || [ "$quicker" ] || [ "$dobib" ] || \
        [ "$clean" ] || [ "$spelling" ] || [ "$eval" ] || [ "$generate" ] || [ "$deploy" ] || \
-       [ "$open" ] || [ "$ci" ] || [ "$unicode" ] || [ "$optimize" ]; then
+       [ "$open" ] || [ "$ci" ] || [ "$unicode" ] || [ "$optimize" ] || [ "$rename" ]; then
 
+        if [ "$rename" ]; then
+            rename
+        fi;
 
         if [ "$optimize" ]; then
             optimize "$DIR_IMG"
@@ -155,8 +158,8 @@ function checkParameter() {
   SYNTAX="Syntax: $0 [-c (clean)] [-b (build)] [-i (bIbtex)] [-r (quicker build)] [-q (quick build)] [-v (verify)] \
      [-s (spell checking)] [-e (run the evaluation)] [-g (generate images etc.)] \
      [-d (deploy)] [-o (open)] [-f (continuous integration)] [-u (unicode check)] \
-     [-z (optimize)] [-h (help)]";
-  while getopts ":qrchvsbiegdfouz" optname
+     [-z (optimize)] [-n (rename)] [-h (help)]";
+  while getopts ":qrchvsbiegdfounz" optname
   do
     case "$optname" in
       "q")
@@ -201,6 +204,9 @@ function checkParameter() {
       "z")
         optimize=1;
         ;;
+      "n")
+        rename=1;
+        ;;
       "h")
         showHelp;
         exit;
@@ -228,6 +234,28 @@ function optimize() {
     checkEnvironment jpegoptim
 	find ${_dir_resources} -iname "*.jpg" -exec \
 	  jpegoptim -o -p {} \;
+}
+
+function rename() {
+    old=$(grep FILE_BASE= build.sh.config|sed -n -e 's/^.*="\(.*\)";/\1/p')
+    echo "Old project name: ${old}"
+    echo -n "New project name: "
+    read new
+    echo "Renaming ${old} to ${new}? (press CTRL+C to cancel)"
+    read
+    TMP_FILE=`mktemp /tmp/config.XXXXXXXXXX`
+    sed -e "s/BASE=\"${old}\"/BASE=\"${new}\"/" build.sh.config > $TMP_FILE
+    mv $TMP_FILE build.sh.config
+
+    TMP_FILE=`mktemp /tmp/config.XXXXXXXXXX`
+    sed -e "s/{${old}}/{${new}}/" ${FILE_BASE}.tex > $TMP_FILE
+    mv $TMP_FILE ${FILE_BASE}.tex
+
+    mv ${FILE_BIB} ${new}.bib
+    mv ${FILE_CONFIG} ${new}.config.tex
+    mv ${FILE_ACRO} ${new}.acro.tex
+    mv ${FILE_BASE}.tex ${new}.tex
+    mv ${FILE_BASE}.meta.tex ${new}.meta.tex
 }
 
 function checkUnicode() {

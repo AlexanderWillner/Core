@@ -13,6 +13,7 @@ help:
 	@echo " * update  : Get the latest sources (incl. latest library)"
 	@echo " * open    : Opens the output file using 'open'"
 	@echo " * ci      : Continuous Integration - watch for changes an rebuild everything"
+	@echo " * rename  : Rename project"
 	@echo " * unicode : Find incompatible unicode characters"
 	@echo " * optimize: Optimize output (e.g. optipng)"
 
@@ -60,6 +61,9 @@ unicode:
 
 optimize:
 	@./build.sh -z
+
+rename:
+	@./build.sh -n
 
 update:
 	@git submodule foreach git pull origin master
