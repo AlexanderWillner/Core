@@ -54,7 +54,7 @@ protrusion=true]{microtype}           % Fonts: margin kerning
         basicstyle=\scriptsize,       % Small text
         numbers=left,                 % Show numbers 
         stepnumber=1,                 % For each line
-        inputencoding=utf8/latin1     % Enable UTF8
+        inputencoding=utf8            % Enable UTF8
         }
 \usepackage{algorithmic}              % Nice pseudo code
 \usepackage{xcolor}                   % To use and define colors
@@ -242,3 +242,20 @@ morestring=[b][\color{black}]\",
   moredelim=[il][\textcolor{darkgray}]{§§}
 }
 % more listings ------------------------------------------------------------
+
+% own requirement environment --------------------------------------------------
+\makeatletter
+\newcommand\requirement[3]{%
+  \protected@write\@auxout{}{\string\CreateCounter{#1}}%
+  \@ifundefined{c@my#1}
+    {#1??: #3}
+    {\refstepcounter{my#1}\label{#2}#1\arabic{my#1}: #3}%
+}
+\newcommand{\CreateCounter}[1]{%
+  \@ifundefined{c@my#1}
+    {\newcounter{my#1}\@namedef{themy#1}{#1\arabic{my#1}}}
+    {}%
+}
+\AtEndDocument{\let\CreateCounter\@gobble}
+\makeatother
+% ------------------------------------------------------------------------------

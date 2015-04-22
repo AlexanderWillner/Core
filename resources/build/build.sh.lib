@@ -8,7 +8,7 @@
 #===============================================================================
 [[ -z $BIN_BIB ]] && BIN_BIB=bibtex
 command -v $BIN_BIB >/dev/null 2>&1 || { echo >&2 "I require $BIN_BIB but it's not installed.  Aborting."; exit 1; }
-command -v pdfinfo >/dev/null 2>&1 && { BIN_PDF="pdfinfo"; }
+command -v qpdf >/dev/null 2>&1 && { BIN_PDF="qpdf"; }
 
 #===============================================================================
 # Method declaration
@@ -123,14 +123,11 @@ function doDefaultProject() {
         if [ "$quick" ] || [ "$quicker" ] || [ "$build" ]; then
             doLatex "$DIR_TMP" "$FILE_MAIN";
             NAME=`basename $FILE_MAIN .tex`;
-            if [ "$DOOPT" == "1" ]; then
-                pdfopt $DIR_TMP/$NAME.pdf $NAME.pdf
-            else
-                cp $DIR_TMP/$NAME.pdf $NAME.pdf
-            fi
+            cp $DIR_TMP/$NAME.pdf $NAME.pdf
+            [ "1" == "$DOOPT" ] && [ -n "$BIN_PDF" ] && ( $BIN_PDF --linearize $DIR_TMP/$NAME.pdf $NAME.pdf )
             showWarnings;
             echo "File created: $NAME.pdf";
-            [ -z "$BIN_PDF" ] || ( pdfinfo $NAME.pdf|grep -i pages )
+            [ -z "$BIN_PDF" ]|| ( echo -n "Pages: "; $BIN_PDF --show-npages $NAME.pdf )
         fi;
 
         if [ "$deploy" ]; then
