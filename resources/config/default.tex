@@ -253,7 +253,7 @@ morestring=[b][\color{black}]\",
 }
 \newcommand{\CreateCounter}[1]{%
   \@ifundefined{c@my#1}
-    {\newcounter{my#1}\@namedef{themy#1}{#1\arabic{my#1}}}
+    {\newcounter{my#1}\global\@namedef{themy#1}{#1\arabic{my#1}}}
     {}%
 }
 \AtEndDocument{\let\CreateCounter\@gobble}
