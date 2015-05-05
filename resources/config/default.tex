@@ -40,9 +40,13 @@
 \pdfgentounicode=1                    % Support copy and search for pdflatex
 \usepackage{amssymb}                  % Springer Verlag (pdflatex)
 \usepackage[hyphens]{url}             % Create URLs in the document
-\usepackage[tracking=true,            % Fonts: hyphenatable letterspacing
+\usepackage[
+spacing=true,                         % Fonts: spacing?
+kerning=true,
+tracking=true,                        % Fonts: hyphenatable letterspacing
 expansion=true,                       % Fonts: better grey value
 protrusion=true]{microtype}           % Fonts: margin kerning
+\microtypecontext{spacing=nonfrench}
 \usepackage[T1]{fontenc}              % Font encoding: T1
 \usepackage{textcomp}                 % For the Euro sign
 \usepackage{booktabs}                 % Nice tables
@@ -74,7 +78,7 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 \usepackage{lipsum}                   % To add some dummy text
 \usepackage{xspace}                   % Fixing some spacing issues
 \usepackage{ellipsis}                 % Puts space around ellipses
-\usepackage{ragged2e}                 % New commands/env. for setting ragged text
+%\usepackage{ragged2e}                 % New commands/env. for setting ragged text
 %\usepackage{lmodern}                 % Nicer fonts (for all)
 \usepackage{ltxtable}                 % Long complex tables
 \usepackage{ltablex}                  % Long complex tables
