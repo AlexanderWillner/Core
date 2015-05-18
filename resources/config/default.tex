@@ -259,9 +259,8 @@ morestring=[b][\color{black}]\",
 % IEEE copyright ---------------------------------------------------------------
 \usepackage[pscoord]{eso-pic}
 \newcommand{\ieeecopyright}[3]{
-\setbox0=\hbox{#3}
-\AddToShipoutPictureFG*{ \put(\LenToUnit{#1\paperwidth},\LenToUnit{#2\paperheight}){\vtop{{\null}\makebox[0pt][c]{#3}}}
-}
+  \setbox0=\hbox{#3}
+  \AddToShipoutPictureFG*{ \put(\LenToUnit{#1\paperwidth},\LenToUnit{#2\paperheight}){\vtop{{\null}\makebox[0pt][c]{#3}}}}
 }
 % IEEE copyright ---------------------------------------------------------------
 
