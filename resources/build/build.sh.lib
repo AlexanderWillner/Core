@@ -96,18 +96,18 @@ function doDefaultProject() {
         fi;
 
         if [ "$build" ]; then
-                cleanAcronyms "$FILE_ACRO"
+          cleanAcronyms "$FILE_ACRO"
         	doLatex "$DIR_TMP" "$FILE_MAIN" "-draftmode";
+          doLatex "$DIR_TMP" "$FILE_MAIN" "-draftmode";
         	if [ "$DOINDEX" == "1" ]; then
         		doIndex "$DIR_TMP" "$DIR_LYT";
         	fi
         	if [ "$DOBIBTEX" == "1" ]; then
             	doBibtex "$DIR_TMP" "$FILE_MAIN" "$FILE_BIB" "$DIR_RES";
             fi
-        	doLatex "$DIR_TMP" "$FILE_MAIN" "-draftmode";
-        	if [ "$DOBIBTEX" == "1" ]; then
-            	doBibtex "$DIR_TMP" "$FILE_MAIN" "$FILE_BIB" "$DIR_RES";
-            fi
+#        	if [ "$DOBIBTEX" == "1" ]; then
+#            	doBibtex "$DIR_TMP" "$FILE_MAIN" "$FILE_BIB" "$DIR_RES";
+#            fi
         	doLatex "$DIR_TMP" "$FILE_MAIN" "-draftmode";
         	doLatex "$DIR_TMP" "$FILE_MAIN" "-draftmode";
         fi;
