@@ -1,6 +1,6 @@
 #===============================================================================
 # * LaTeX thesis template (build library)
-# * @author  : Alexander willner (willner@cs.uni-bonn.de)
+# * @author  : Alexander willner (alex@willner.ws)
 #===============================================================================
 
 #===============================================================================
@@ -374,11 +374,15 @@ function checkProject() {
     python3 lib/resources/scripts/bibtex_check_0.2.0.py -i `basename $_file_main .tex`.bib
 	biber -T -V `basename $_file_main .tex`|grep -Ev "mendeley|INFO"
 
-    echo "Checking unicode...";
+    echo "Checking for unicode issues...";
     checkUnicode $_dir_sources/
 
-    echo "Checking missed acronyms...";
+    echo "Checking for missed acronyms...";
     grep -HIrnsE "^[^%].* [A-Z]{2,}[ |s]" $_dir_sources/
+
+    # note that this somehow shows false positives sometimes :/
+    echo "Checking for duplicated/repeated words...";
+    grep -rEo '\b(\w+)(\s+\1\b)+' $_dir_sources/
 
     echo -n "Checking orthography...";
 	if [ "$DOSPELLCHECK" == "1" ]; then
