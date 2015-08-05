@@ -6,6 +6,7 @@
 #===============================================================================
 # Defaults
 #===============================================================================
+[[ -z $BIN_NOT ]] && BIN_NOT=terminal-notifier
 [[ -z $BIN_BIB ]] && BIN_BIB=bibtex
 command -v $BIN_BIB >/dev/null 2>&1 || { echo >&2 "I require $BIN_BIB but it's not installed.  Aborting."; exit 1; }
 command -v qpdf >/dev/null 2>&1 && { BIN_PDF="qpdf"; }
@@ -128,6 +129,7 @@ function doDefaultProject() {
             showWarnings;
             echo "File created: $NAME.pdf";
             [ -z "$BIN_PDF" ]|| ( echo -n "Pages: "; $BIN_PDF --show-npages $NAME.pdf )
+            [ -z "$BIN_NOT" ] || $BIN_NOT -title "LaTeX" -message "Build ready" -open "file://$(pwd)/$NAME.pdf"
         fi;
 
         if [ "$deploy" ]; then
