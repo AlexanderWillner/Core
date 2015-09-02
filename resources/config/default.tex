@@ -297,6 +297,8 @@ morestring=[b][\color{black}]\",
 \makeatletter
 \newcommand\requirement[3]{%
   \protected@write\@auxout{}{\string\CreateCounter{#1}}%
+  \crefname{my#1}{requirement}{requirements}\Crefname{my#1}{Requirement}{Requirements} %fixme:doesn't work
+  \crefname{#1}{requirement}{requirements}\Crefname{#1}{Requirement}{Requirements} %fixme:doesn't work
   \@ifundefined{c@my#1}
     {#1??: #3}
     {\refstepcounter{my#1}\label{#2}#1\arabic{my#1}: #3}%
