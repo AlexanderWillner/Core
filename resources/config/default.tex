@@ -130,7 +130,7 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 
 % annotations --------------------------------------------------------------
 \newcommand{\annot}[2][]{%
-    \pdfannot width \linewidth height 2\baselineskip depth 0pt{%
+    \pdfannot\ width \linewidth\ height 2\baselineskip\ depth 0pt{%
         /Subtype/Text%
         /Open false
         /Name /Comment%
@@ -213,21 +213,21 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 
 %for two-column layout
 \makeatletter
-\g@addto@macro\@mn@margintest{%
-  \if@twocolumn
-    \ifx\@mn@currxpos\relax% don't know which margin use normal one
-      \normalmarginpar
-    \else\ifx\@mn@currxpos\@empty% don't know which margin use normal one
-        \normalmarginpar
+\g@addto@macro\@mn@margintest{% chktex 21
+  \if@twocolumn%
+    \ifx\@mn@currxpos\relax% don't know which margin use normal one chktex 21
+      \normalmarginpar%
+    \else\ifx\@mn@currxpos\@empty% don't know which margin use normal one chktex 21
+        \normalmarginpar%
       \else
         \if@tempswa% use \oddsidemargin for tests
-          \ifdim\@mn@currxpos >\dimexpr \oddsidemargin+1in+\columnwidth\relax
+          \ifdim\@mn@currxpos\ >\dimexpr\ \oddsidemargin+1in+\columnwidth\relax% chktex 21
             \normalmarginpar% right column --> right margin
           \else
             \reversemarginpar% left column --> left margin
           \fi
         \else% use \evensidemargin for tests
-          \ifdim\@mn@currxpos >\dimexpr \evensidemargin+1in+\columnwidth\relax
+          \ifdim\@mn@currxpos\ >\dimexpr\ \evensidemargin+1in+\columnwidth\relax% chktex 21
             \reversemarginpar% right column --> right margin
           \else
             \normalmarginpar% left column --> left margin
@@ -263,7 +263,7 @@ morestring=[b][\color{black}]\",
   stringstyle=\color{groovygreen}\ttfamily,
   keywords=[3]{each, findAll, groupBy, collect, inject, eachWithIndex},
   morekeywords={def, as, in, use},
-  moredelim=[is][\textcolor{darkgray}]{\%\%}{\%\%},
+  moredelim=[is][\textcolor{darkgray}]{\%\%}{\%\%}, % chktex 21
   moredelim=[il][\textcolor{darkgray}]{§§}
 }
 % more listings ------------------------------------------------------------
@@ -287,17 +287,17 @@ morestring=[b][\color{black}]\",
       \def\x##1:{}%
       % Extract Unicode char from command name
       % (utf8.def does not support surrogates)
-      \edef\x{\expandafter\x\string#1}%
+      \edef\x{\expandafter\x\string#1}% chktex 41
       \StringEncodingConvert\x\x{utf8}{utf16be}% convert to UTF-16BE
       % Hexadecimal representation
       \EdefEscapeHex\x\x
       % Enhanced error message
       \PackageError{inputenc}{Unicode\space char\space \string#1\space
-                              (U+\x)\MessageBreak
+                              (U+\x)\MessageBreak%
                               not\space set\space up\space
-                              for\space use\space with\space LaTeX}\@eha
+                              for\space use\space with\space LaTeX}\@eha%
     \endgroup
-  \else\expandafter
+  \else\expandafter% chktex 41
     #1%
   \fi
 }
@@ -307,7 +307,7 @@ morestring=[b][\color{black}]\",
 % own requirement environment --------------------------------------------------
 \makeatletter
 \newcommand\requirement[3]{%
-  \protected@write\@auxout{}{\string\CreateCounter{#1}}%
+  \protected@write\@auxout{}{\string\CreateCounter{#1}}% chktex 21
   \crefname{my#1}{requirement}{requirements}\Crefname{my#1}{Requirement}{Requirements} %fixme:doesn't work
   \crefname{#1}{requirement}{requirements}\Crefname{#1}{Requirement}{Requirements} %fixme:doesn't work
   \@ifundefined{c@my#1}
@@ -316,9 +316,9 @@ morestring=[b][\color{black}]\",
 }
 \newcommand{\CreateCounter}[1]{%
   \@ifundefined{c@my#1}
-    {\newcounter{my#1}\global\@namedef{themy#1}{#1\arabic{my#1}}}
+    {\newcounter{my#1}\global\@namedef{themy#1}{#1\arabic{my#1}}}% chktex 21
     {}%
 }
-\AtEndDocument{\let\CreateCounter\@gobble}
+\AtEndDocument{\let\CreateCounter\@gobble}% chktex 21
 \makeatother
 % ------------------------------------------------------------------------------
