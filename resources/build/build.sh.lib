@@ -228,13 +228,8 @@ function checkParameter() {
 function optimize() {
 	_dir_resources="$1";
 
-    checkEnvironment optipng
-	find ${_dir_resources} -iname "*.png" -exec \
-	  optipng {} \;
-
-    checkEnvironment jpegoptim
-	find ${_dir_resources} -iname "*.jpg" -exec \
-	  jpegoptim -o -p {} \;
+  checkEnvironment optipng && find ${_dir_resources} -iname "*.png" -exec optipng {} \;
+  checkEnvironment jpegoptim && find ${_dir_resources} -iname "*.jpg" -exec jpegoptim -o -p {} \;
 }
 
 function rename() {
@@ -281,6 +276,7 @@ function checkEnvironment() {
     #if [ "$_error" != "0" ]; then
     #   exit 1;
     #fi;
+    return $_error
 }
 
 function checkError() {
