@@ -1,3 +1,4 @@
+#!/bin/bash
 #===============================================================================
 # * LaTeX thesis template (build library)
 # * @author  : Alexander willner (alex@willner.ws)
@@ -281,7 +282,6 @@ function checkEnvironment() {
 
 function checkError() {
     _exitcode="$1";
-	_exit="$2";
     if [ "$_exitcode" != "0" ]; then
         echo "WARNING: Command failed. The build might fail!! See $FILE_LOG.";
         #exit $_exitcode
@@ -294,11 +294,10 @@ function checkRule() {
     _message="$3";
     _casesens="$4";
     IFS="#";
-    STATE=0;
 
     if [ ! -f "$_filename" ]; then
-        echo -n "s..."
-        return 0
+        echo "ERROR: could not find: $_filename"
+        return 1
     fi
 
     content=`cat $_filename | perl -pe "s/%.*$//g"`;
@@ -342,14 +341,15 @@ function checkSpellingInteractive() {
 	_dir_resources="$2";
 	_language="$3";
 
-    for filename in `ls $_dir_sources`; do
+
+    for filename in $_dir_sources/*; do
       aspell --home-dir=$_dir_resources \
         --lang=$_language \
         --dont-backup --encoding=utf-8 --mode=tex --dont-tex-check-comments \
         --add-tex-command="bibliographystyle po" \
         --add-tex-command="bibliography po" \
         --add-tex-command="eqref po" \
-        check $_dir_sources/$filename;
+        check $filename;
     done
 }
 
@@ -363,120 +363,125 @@ function checkProject() {
 	_file_main="$7";
 	_file_bib="$8";
 	_language="$9";
-        #TODO: refactor this!
+  #TODO: refactor this!
 	#_dir_cfg="$10";
-        _dir_cfg="$DIR_CFG";
+  _dir_cfg="$DIR_CFG";
 	_error=0;
 
   echo "Running chktex...";
-  checkEnvironment chktex && find "$_dir_sources" -iname "*.tex" -exec chktex -q {} \;
+  checkEnvironment chktex && chktex -q "${_file_main}"
 
-  echo -n "Checking bibtex...";
-  python3 lib/resources/scripts/bibtex_check_0.2.0.py -i `basename $_file_main .tex`.bib
-	biber -T -V `basename $_file_main .tex`|grep -Ev "mendeley|INFO"
+  #echo "Checking for missed acronyms...";
+  #grep -HIrnsE "^[^%].* [A-Z]{4,}[ |s]" $_dir_sources/|grep -v caption
 
-    echo "Checking for unicode issues...";
-    checkUnicode $_dir_sources/
+  # note that this somehow shows false positives sometimes :/
+  echo "Checking for duplicated/repeated words...";
+  grep -rEo '\b(\w+)(\s+\1\b)+' $_dir_sources/
 
-    echo "Checking for missed acronyms...";
-    grep -HIrnsE "^[^%].* [A-Z]{2,}[ |s]" $_dir_sources/
+  echo "Checking config...";
+  checkRule "$BAD_CONFIG" "$_file_config" "Avoid";
+  if [ "$?" != "0" ]; then _error=1; fi
+  checkRule "$BAD_CONFIG" "$_dir_cfg/default.tex" "Avoid";
+  if [ "$?" != "0" ]; then _error=1; fi
+  checkRule "$BAD_CONFIG" "$_dir_cfg/pdfmetadata.tex" "Avoid";
+  if [ "$?" != "0" ]; then _error=1; fi
 
-    # note that this somehow shows false positives sometimes :/
-    echo "Checking for duplicated/repeated words...";
-    grep -rEo '\b(\w+)(\s+\1\b)+' $_dir_sources/
+  echo "Checking bibtex...";
+  python lib/resources/scripts/bibtex_check_0.2.0.py -i "${_dir_tmp}/$(basename $_file_main .tex)".bib -a "${_dir_tmp}/$(basename $_file_main .tex)".aux
+  issues="$(grep -Eo 'problems: [0-9]{1,4}' bibtex_check.html|grep -Eo "[0-9]{1,4}")"
+  if [ "0" -ne "$issues" ]; then
+    echo "Found $issues issues in bibtex_check.html"
+    _error=1
+  fi
+  biber -T -V "${_dir_tmp}/$(basename $_file_main .tex)" | grep -Ev "mendeley|INFO|Duplicate" > bibtex_check.txt
+  issues="$(cat bibtex_check.txt|wc -l)"
+  if [ "0" -ne "$issues" ]; then
+    echo "Found $issues issues in bibtex_check.txt"
+    _error=1
+  fi
 
-    echo -n "Checking orthography...";
-	if [ "$DOSPELLCHECK" == "1" ]; then
-      for file in `ls $_dir_sources/*.tex`; do
-        checkSpelling "$file" $_dir_resources $_language;
-        if [ "$?" != "0" ]; then _error=1; fi
-      done
-    fi
-    for file in `ls $_dir_sources/*.tex`; do
-      checkRule "$MISTAKES" "$file" "Double checkRule spelling: ";
-      if [ "$?" != "0" ]; then _error=1; fi
-    done
-    for file in `ls $_dir_sources/*.tex`; do
-      checkRule "$MISTAKES_CS" "$file" "Double checkRule spelling: " true;
-      if [ "$?" != "0" ]; then _error=1; fi
-    done
-    echo "done";
-    echo -n "Checking hyphens...";
-    for file in `ls $_dir_sources/*.tex`; do
-      checkRule "$HYPHENS" "$file" "These prepositions should not be written with a hyphen: ";
-      if [ "$?" != "0" ]; then _error=1; fi
-    done
-    echo "done";
-    echo -n "Checking commas...";
-    for file in `ls $_dir_sources/*.tex`; do
-      checkRule "$COMMAS" "$file" "I think we need a comma here: " true;
-      if [ "$?" != "0" ]; then _error=1; fi
-    done
-    echo "done";
-    echo -n "Checking references...";
-    for file in `ls $_dir_sources/*.tex`; do
-      checkRule "$REFS" "$file" "References must be written in uppercase: " true;
-      if [ "$?" != "0" ]; then _error=1; fi
-    done
-    echo "done";
-    echo -n "Checking todos...";
-    for file in `ls $_dir_sources/*.tex`; do
-      checkRule "$TODOS" "$file" "";
-      if [ "$?" != "0" ]; then _error=1; fi
-    done
-    echo "done";
-    echo -n "Checking general...";
-    for file in `ls $_dir_sources/*.tex`; do
-      checkRule "$AVOID" "$file" "Avoid" true;
-      if [ "$?" != "0" ]; then _error=1; fi
-    done
-    echo "done";
-	  echo -n "Checking macros...";
-    for file in `ls $_dir_sources/*.tex`; do
-      checkRule "$MACROS" "$file" "Use an LaTeX macro instead" true;
-      if [ "$?" != "0" ]; then _error=1; fi
-    done
-    echo "done";
-    echo -n "Checking abstract...";
-    checkRule "$BAD_ABSTRACT" "$_file_abstract" "Avoid";
-      if [ "$?" != "0" ]; then _error=1; fi
-    WORDS=`cat $_filename | perl -pe "s/%.*$//g" | wc -w`;
-    if [ $WORDS -lt "$MIN_ABSTRACT" ] || [ $WORDS -gt "$MAX_ABSTRACT" ]; then
-      echo "warning: you've $WORDS words in your abstract [Should be: $MIN_ABSTRACT-$MAX_ABSTRACT].";
-      _error=1
-    fi
-    echo "done";
-    echo -n "Checking introduction...";
-    checkRule "$BAD_INTRO" "$_file_introduction" "Avoid";
+  echo "Checking todos...";
+  for file in $_dir_sources/*.tex; do
+    checkRule "$TODOS" "$file" "";
     if [ "$?" != "0" ]; then _error=1; fi
-    echo "done";
-    echo -n "Checking config...";
-    checkRule "$BAD_CONFIG" "$_file_config" "Avoid";
-    if [ "$?" != "0" ]; then _error=1; fi
-    checkRule "$BAD_CONFIG" "$_dir_cfg/default.tex" "Avoid";
-    if [ "$?" != "0" ]; then _error=1; fi
-    checkRule "$BAD_CONFIG" "$_dir_cfg/pdfmetadata.tex" "Avoid";
-    if [ "$?" != "0" ]; then _error=1; fi
-    echo "done";
-    echo -n "Checking latex (l2tabu)...";
-    checkRule "$L2TABU" "$_file_config" "Avoid";
-    if [ "$?" != "0" ]; then _error=1; fi
-    for file in `ls $_dir_sources/*.tex`; do
-      checkRule "$L2TABU" "$file" "Avoid";
+  done
+
+  echo "Checking orthography...";
+  if [ "$DOSPELLCHECK" == "1" ]; then
+    for file in $_dir_sources/*.tex; do
+      checkSpelling "$file" $_dir_resources $_language;
       if [ "$?" != "0" ]; then _error=1; fi
     done
-    echo "done";
-    echo "Checking latex/bibtex (compiling)...";
-    doLatex $_dir_tmp $_file_main
-	if [ "$DOBIBTEX" == "1" ]; then
-        doBibtex $_dir_tmp $_file_main $_file_bib
-    fi
-    doLatex $_dir_tmp $_file_main
-	resetLogging;
-	doLatex $_dir_tmp $_file_main
-	if [ "$?" != "0" ]; then _error=1; fi
-	showWarnings;
-	if [ "$?" != "0" ]; then _error=1; fi
+  fi
+
+  echo "Checking abstract...";
+  checkRule "$BAD_ABSTRACT" "$_file_abstract" "Avoid";
+    if [ "$?" != "0" ]; then _error=1; fi
+  WORDS=`cat $_filename | perl -pe "s/%.*$//g" | wc -w`;
+  if [ $WORDS -lt "$MIN_ABSTRACT" ] || [ $WORDS -gt "$MAX_ABSTRACT" ]; then
+    echo "warning: you've $WORDS words in your abstract [Should be: $MIN_ABSTRACT-$MAX_ABSTRACT].";
+    _error=1
+  fi
+
+  echo "Checking introduction...";
+  checkRule "$BAD_INTRO" "$_file_introduction" "Avoid";
+  if [ "$?" != "0" ]; then _error=1; fi
+
+  echo "Checking references...";
+  for file in $_dir_sources/*.tex; do
+    checkRule "$REFS" "$file" "References must be written in uppercase: " true;
+    if [ "$?" != "0" ]; then _error=1; fi
+  done
+
+  echo "Checking latex (l2tabu)...";
+  checkRule "$L2TABU" "$_file_config" "Avoid";
+  if [ "$?" != "0" ]; then _error=1; fi
+  for file in $_dir_sources/*.tex; do
+    checkRule "$L2TABU" "$file" "Avoid";
+    if [ "$?" != "0" ]; then _error=1; fi
+  done
+
+  echo "Checking commas...";
+  for file in $_dir_sources/*.tex; do
+    checkRule "$COMMAS" "$file" "I think we need a comma here: " true;
+    if [ "$?" != "0" ]; then _error=1; fi
+  done
+
+  echo "Checking hyphens...";
+  for file in $_dir_sources/*.tex; do
+    checkRule "$HYPHENS" "$file" "These prepositions should not be written with a hyphen: ";
+    if [ "$?" != "0" ]; then _error=1; fi
+  done
+
+  echo "Checking for common mistakes...";
+  for file in $_dir_sources/*.tex; do
+    checkRule "$MISTAKES" "$file" "Double checkRule spelling: ";
+    if [ "$?" != "0" ]; then _error=1; fi
+  done
+
+  echo "Checking for common mistakes 2...";
+  for file in $_dir_sources/*.tex; do
+    checkRule "$MISTAKES_CS" "$file" "Double checkRule spelling: " true;
+    if [ "$?" != "0" ]; then _error=1; fi
+  done
+
+  # too restrictive
+  #echo "Checking general...";
+  #for file in $_dir_sources/*.tex; do
+  #  checkRule "$AVOID" "$file" "Avoid" true;
+  #  if [ "$?" != "0" ]; then _error=1; fi
+  #done
+
+  # too restrictive
+  #echo "Checking for unicode issues...";
+  #checkUnicode $_dir_sources/
+
+  # too restrictive
+  #echo "Checking macros...";
+  #for file in ls $_dir_sources/*.tex; do
+  #  checkRule "$MACROS" "$file" "Use an LaTeX macro instead" true;
+  #  if [ "$?" != "0" ]; then _error=1; fi
+  #done
 
   return $_error
   #---------------------------------------------------------------------------
@@ -688,7 +693,7 @@ function doEvaluation() {
 
 
 #===============================================================================
-# Fetails about lints, smells, bugs, and conventions:
+# Details about lints, smells, bugs, and conventions:
 # * http://mirror.ctan.org/info/l2tabu/english/l2tabu.pdf
 # * http://www.cs.columbia.edu/~hgs/etc/writing-style.html
 # * http://www.cs.columbia.edu/~hgs/etc/writing-bugs.html
@@ -696,12 +701,12 @@ function doEvaluation() {
 # * http://www.punctuationmadesimple.com/PMSHyphen.html
 # * http://www.jr-x.de/publikationen/latex/tipps/besonderheiten.html
 #===============================================================================
-HYPHENS="\bpre-[^\s]+#\banti-[^\s]+#\bmacro-[^\s]+#\bmicro-[^\s]+#\bpost-[^\s]+#\bover-[^\s]+#\bsemi-[^\s]+#\bsub-[^\s]+#\bsupra-[^\s]+#\btrans-[^\s]+#\bultra-[^\s]+#\bmeta-[^\s]+#\banti-[^\s]+#\ba-[^\s]+#\bbe-[^\s]+#\bby-[^\s]+#\bdis-[^\s]+#\bfull-[^\s]+#\bhyper-[^\s]+#\bmid-[^\s]+#\bmini-[^\s]+#\bnon-[^\s]+#\bpre-[^\s]+#\bunder-[^\s]+#\bup-[^\s]+#\bante-[^\s]+#\bmulti-[^\s]+#\binfra-[^\s]+#\binter-[^\s]+#\bintra-[^\s]+";
-COMMAS="However\s+#In fact\s+#Therefore\s+#Nevertheless\s+#Moreover\s+#Furthermore\s+#Still\s+#Instead\s+#Unfortunately\s+#On the one hand\s+#On the other hand\s+#[^,]\s+dass#[^.]*[^,]\s+um[^.]+zu[^.]+.";
+HYPHENS="\bpre-[^\s]+#\banti-[^\s]+#\bmacro-[^\s]+#\bmicro-[^\s]+#\bpost-[^\s]+#\bover-[^\s]+#\bsemi-[^\s]+#\bsub-[^\s]+#\bsupra-[^\s]+#\btrans-[^\s]+#\bultra-[^\s]+#\bmeta-[^\s]+#\banti-[^\s]+#\bbe-[^\s]+#\bby-[^\s]+#\bdis-[^\s]+#\bfull-[^\s]+#\bhyper-[^\s]+#\bmid-[^\s]+#\bmini-[^\s]+#\bnon-[^\s]+#\bpre-[^\s]+#\bunder-[^\s]+#\bup-[^\s]+#\bante-[^\s]+#\bmulti-[^\s]+#\binfra-[^\s]+#\binter-[^\s]+#\bintra-[^\s]+";
+COMMAS="However\s+#In fact\s+#Therefore\s+#Nevertheless\s+#Moreover\s+#Furthermore\s+#Still\s+#Instead\s+[^o][^f]#Unfortunately\s+#On the one hand\s+#On the other hand\s+#[^,]\s+dass#[^.]*[^,]\s+um[^.]+zu[^.]+.";
 REFS='[^\\]section[^A-Za-z\.,;\}\(]+\\#figure[^A-Za-z\.,;\}\(]+\\#equation[^A-Za-z\.,;\}\(]+\\#table[^A-Za-z\.,;\}\(]+\\';
 MISTAKES='test bed#test-bed';
 MISTAKES_CS='\bwebservice\b#\bweb service\b#\bMiddleware\b#\bArgon[^:]\b#\binternet\b';
-AVOID="clearly#obviously#actually#\$i-th\$#etc\.#\.e\.#e\.g\.[^,]#[^,]\s{,1}respectively#Therefore[^,]#thus[^,]#related works#following (figure\b|fig\.)#[^~](\s*)\\\ref#kbps#mbps#msec#recent advances in# don't#doesn't#we've#won't#it's#That's because#optimally#Equation(~|\s*)\\\ref#\still\s#make assumption#is a function of#is an illustration#is a requirement#utilizes#had difference#\\\$[0-9]+\\\$#\\\cite{.*}\\s\\\cite#\bgut\b#\bschlecht\b#\bschön\b#\bfurchtbar\b#\bdumm\b#\bwahr\b#\bfalsch\b#\bperfekt\b#\bideal\b#\bheutzutage\b#\bmodern\b#\bbald\b#\büberrascht\b#\bscheint\b#\bbasiert\b#\bviele\b#\beinige\b#\bähnlich\b#\bwahrscheinlich\b#\bselbstverständlich\b#\bklar\b#\bwirklich\b#\beinfach\b#\bdieses\b#\bjenes\b#\bwir\b#\bhoffentlich\b#\bbekannt\b#\bberühmt\b#\bmuss\b#\bman\b#\b\bhalt\b\b#\bimmer\b#\bsollte\b#\bbeweis\b#\bzeigt\b#\bkann\b#\bsollte\b#\bmüsste\b#\bsoon\b#\bbald\b#\bperfect\b#\bperfekt\b#\bseems\b#\bscheint\b#\blots of\b#\bkind of\b#\btype of\b#\bsomethink like\b#\bprobably\b#\balong with\b#\bwould seem to show\b#\ban ideal solution\b#\bbad\b#\bnice\b#\bstupid\b#\bmodern times\b#\btoday\b#\ba famous researcher\b#\bsimple\b#z\.B\.#d\.h\.#z\.Z\.#u\.a\.#\\\caption.*\\\ac"
+AVOID="clearly#obviously#actually#\$i-th\$#etc\.#\.e\.#e\.g\.[^,]#[^,]\s{,1}respectively#Therefore[^,]#thus[^,]#related works#following (figure\b|fig\.)#[^~](\s*)\\\ref#\bkbps#\bmbps#\bmsec#recent advances in# don't#doesn't#we've#won't#it's#That's because#optimally#Equation(~|\s*)\\\ref#\still\s#make assumption#is a function of#is an illustration#is a requirement#utilizes#had difference#\\\$[0-9]+\\\$#\\\cite{.*}\\s\\\cite#\bgut\b#\bschlecht\b#\bschön\b#\bfurchtbar\b#\bdumm\b#\bwahr\b#\bfalsch\b#\bperfekt\b#\bideal\b#\bheutzutage\b#\bmodern\b#\bbald\b#\büberrascht\b#\bscheint\b#\bbasiert\b#\bviele\b#\beinige\b#\bähnlich\b#\bwahrscheinlich\b#\bselbstverständlich\b#\bklar\b#\bwirklich\b#\beinfach\b#\bdieses\b#\bjenes\b#\bwir\b#\bhoffentlich\b#\bbekannt\b#\bberühmt\b#\bmuss\b#\bman\b#\b\bhalt\b\b#\bimmer\b#\bsollte\b#\bbeweis\b#\bzeigt\b#\bkann\b#\bsollte\b#\bmüsste\b#\bsoon\b#\bbald\b#\bperfect\b#\bperfekt\b#\bseems\b#\bscheint\b#\blots of\b#\bkind of\b#\btype of\b#\bsomethink like\b#\bprobably\b#\balong with\b#\bwould seem to show\b#\ban ideal solution\b#\bbad\b#\bnice\b#\bstupid\b#\bmodern times\b#\btoday\b#\ba famous researcher\b#\bsimple\b#z\.B\.#d\.h\.#z\.Z\.#u\.a\.#\\\caption.*\\\ac"
 MACROS="\bPreface\b#\bVorwort\b#\bReferences\b#\bLiteratur\b#\bBibliography\b#\bLiteraturverzeichnis\b#\bAppendix\b#\bAnhang\b#\bContents\b#\bInhaltsverzeichnis\b#\bList of Figures\b#\bAbbildungsverzeichnis\b#\bList of Tables\b#\bTabellenverzeichnis\b#\bFigure|Fig\.[^A-Za-z\.,;]+#\bAbbildung|Abb\.[^A-Za-z\.,;]+#\bTable|Tab\.[^A-Za-z\.,;]+#\bTabelle[^A-Za-z\.,;]+#\bEquation|Eq\.[^A-Za-z\.,;]+#\bSection|Seq\.[^A-Za-z\.,;]+#\bPart\b#\bTeil\b#\bencl\b#\bAnlage(n)\b#\bVerteiler\b#\bPage\b#\bSeite\b#\bsee also\b#\bsiehe auch\b";
 BAD_ABSTRACT="\cite#\equation#in this paper";
 BAD_INTRO="recent advances in#growth of the Internet";

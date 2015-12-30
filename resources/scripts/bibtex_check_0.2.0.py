@@ -1,14 +1,17 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# encoding=utf8
 
 """
 BibTeX check on missing fields and consistent name conventions (no BibTeX validator),
-especially developed for requirements in Computer Science. 
+especially developed for requirements in Computer Science.
+Updated by Alexander Willner to support python 2.7 and UTF-8.
 """
 
 import sys, getopt
 
 __author__ = "Fabian Beck"
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 __license__ = "MIT"
 
 ####################################################################
@@ -29,7 +32,7 @@ for opt, arg in opts:
       elif opt in ("-i"):
          bibFile = arg
       elif opt in ("-a"):
-         auxFile = arg      
+         auxFile = arg
 # files
 htmlOutput = "bibtex_check.html"
 
@@ -40,7 +43,7 @@ scholarHref = "http://scholar.google.de/scholar?hl=en&q="
 googleHref = "https://www.google.de/search?q="
 dblpHref = "http://dblp.org/search/index.php#query="
 
-# fields that are required for a specific type of entry 
+# fields that are required for a specific type of entry
 requiredFields = (("inproceedings",("author","booktitle","pages","publisher","title","year")),
                 ("article",("author","journal","number","pages","title","volume","year")),
                 ("techreport",("author","institution","title","year")),
@@ -53,16 +56,20 @@ requiredFields = (("inproceedings",("author","booktitle","pages","publisher","ti
                 ("electronic",("author","title","url","year")),
                 ("misc",("author","howpublished","title","year")),
                 )
-				
+
 ####################################################################
 
 import string
 import re
+import codecs
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 usedIds = set()
 
-try: 
-    fInAux = open(auxFile, 'r', encoding="utf8")
+try:
+    fInAux = codecs.open(auxFile, 'r', encoding="utf8")
     for line in fInAux:
         if line.startswith("\\citation"):
             ids = line.split("{")[1].rstrip("} \n").split(",")
@@ -73,7 +80,7 @@ try:
 except IOError as e:
     print("no aux file '"+auxFile+"' exists -> do not restrict entities")
 
-fIn = open(bibFile, 'r', encoding="utf8")
+fIn = codecs.open(bibFile, 'r', encoding="utf8")
 completeEntry = ""
 currentId = ""
 ids = []
@@ -154,7 +161,7 @@ for line in fIn:
                 # Checks (please (de)activate/extend to your needs)
                 ####################################################################
 
-                    
+
                 # check if type 'proceedings' might be 'inproceedings'
                 if currentType == "proceedings" and field == "pages":
                     subproblems.append("wrong type: maybe should be 'inproceedings' because entry has page numbers")
@@ -170,7 +177,7 @@ for line in fIn:
                 #if currentType == "inproceedings" and field == "booktitle":
                     #if ":" not in line or ("Proceedings" not in line and "Companion" not in line) or "." in line or " '" not in line or "workshop" in line or "conference" in line or "symposium" in line:
                         #subproblems.append("flawed name: inconsistent formatting of booktitle '"+value+"'")
-                        #counterFlawedNames += 1   
+                        #counterFlawedNames += 1
 
                  # check if title is capitalized (heuristic)
                  #if field == "title":
@@ -180,12 +187,12 @@ for line in fIn:
                             #subproblems.append("flawed name: non-capitalized title '"+currentTitle+"'")
                             #counterFlawedNames += 1
                             #break
-                 
+
                 ####################################################################
-                 
+
 fIn.close()
 
-html = open(htmlOutput, 'w')
+html = codecs.open(htmlOutput, 'w')
 html.write("""<html>
 <head>
 <title>BibTeX Check</title>
@@ -200,7 +207,7 @@ body {
 
 #title {
     width: 720px;
-    
+
     border-bottom: 1px solid black;
 }
 
