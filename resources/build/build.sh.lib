@@ -368,8 +368,11 @@ function checkProject() {
         _dir_cfg="$DIR_CFG";
 	_error=0;
 
-    echo -n "Checking bibtex...";
-    python3 lib/resources/scripts/bibtex_check_0.2.0.py -i `basename $_file_main .tex`.bib
+  echo "Running chktex...";
+  checkEnvironment chktex && find "$_dir_sources" -iname "*.tex" -exec chktex -q {} \;
+
+  echo -n "Checking bibtex...";
+  python3 lib/resources/scripts/bibtex_check_0.2.0.py -i `basename $_file_main .tex`.bib
 	biber -T -V `basename $_file_main .tex`|grep -Ev "mendeley|INFO"
 
     echo "Checking for unicode issues...";
