@@ -5,7 +5,7 @@
 """
 BibTeX check on missing fields and consistent name conventions (no BibTeX validator),
 especially developed for requirements in Computer Science.
-Updated by Alexander Willner to support python 2.7 and UTF-8.
+Updated by Alexander Willner: support for python 2.7 and UTF-8. Disabled check for abbreviations.
 """
 
 import sys, getopt
@@ -168,10 +168,10 @@ for line in fIn:
                     counterWrongTypes += 1
 
                 # check if abbreviations are used in journal titles
-                if currentType == "article" and field == "journal":
-                    if "." in line:
-                        subproblems.append("flawed name: abbreviated journal title '"+value+"'")
-                        counterFlawedNames += 1
+                #if currentType == "article" and field == "journal":
+                #    if "." in line:
+                #        subproblems.append("flawed name: abbreviated journal title '"+value+"'")
+                #        counterFlawedNames += 1
 
                 # check booktitle format; expected format "ICBAB '13: Proceeding of the 13th International Conference on Bla and Blubb"
                 #if currentType == "inproceedings" and field == "booktitle":
