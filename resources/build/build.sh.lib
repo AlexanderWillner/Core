@@ -39,7 +39,7 @@ function endLogging() {
 function doDefaultProject() {
     if [ "$verify" ] || [ "$build" ] || [ "$quick" ] || [ "$quicker" ] || [ "$dobib" ] || \
        [ "$clean" ] || [ "$spelling" ] || [ "$eval" ] || [ "$generate" ] || [ "$deploy" ] || \
-       [ "$open" ] || [ "$ci" ] || [ "$unicode" ] || [ "$optimize" ] || [ "$rename" ]; then
+       [ "$open" ] || [ "$ci" ] || [ "$unicode" ] || [ "$optimize" ] || [ "$rename" ] || [ "$bibcheck" ]; then
 
         if [ "$rename" ]; then
             rename
@@ -96,6 +96,12 @@ function doDefaultProject() {
                  "$LANG"
         	exit $?;
         fi;
+
+        if [ "$bibcheck" ]; then
+            checkBib "$DIR_SRC" "$DIR_TMP" "$FILE_BIB" "$FILE_MAIN"
+        	exit $?;
+        fi;
+
 
         if [ "$build" ]; then
           cleanAcronyms "$FILE_ACRO"
@@ -158,10 +164,10 @@ function doDefaultProject() {
 
 function checkParameter() {
   SYNTAX="Syntax: $0 [-c (clean)] [-b (build)] [-i (bIbtex)] [-r (quicker build)] [-q (quick build)] [-v (verify)] \
-     [-s (spell checking)] [-e (run the evaluation)] [-g (generate images etc.)] \
+     [-w (bib checking)] [-s (spell checking)] [-e (run the evaluation)] [-g (generate images etc.)] \
      [-d (deploy)] [-o (open)] [-f (continuous integration)] [-u (unicode check)] \
      [-z (optimize)] [-n (rename)] [-h (help)]";
-  while getopts ":qrchvsbiegdfounz" optname
+  while getopts ":qrchvsbiegdfounwz" optname
   do
     case "$optname" in
       "q")
@@ -175,6 +181,9 @@ function checkParameter() {
         ;;
       "v")
         verify=1;
+        ;;
+      "w")
+        bibcheck=1;
         ;;
       "s")
         spelling=1;
@@ -353,6 +362,31 @@ function checkSpellingInteractive() {
     done
 }
 
+
+function checkBib() {
+  _dir_sources="$1";
+	_dir_tmp="$2";
+	_file_bib="$3";
+  _file_main="$4";
+  _error=0;
+
+  echo "Checking bibtex...";
+  python lib/resources/scripts/bibtex_check_0.2.0.py -i "${_dir_tmp}/$(basename $_file_main .tex)".bib -a "${_dir_tmp}/$(basename $_file_main .tex)".aux
+  issues="$(grep -Eo 'problems: [0-9]{1,4}' bibtex_check.html|grep -Eo "[0-9]{1,4}")"
+  if [ "0" -ne "$issues" ]; then
+    echo "Found $issues issues in bibtex_check.html"
+    _error=1
+  fi
+  biber -T -V "${_dir_tmp}/$(basename $_file_main .tex)" | grep -Ev "mendeley|INFO|Duplicate" > bibtex_check.txt
+  issues="$(cat bibtex_check.txt|wc -l)"
+  if [ "0" -ne "$issues" ]; then
+    echo "Found $issues issues in bibtex_check.txt"
+    _error=1
+  fi
+
+  return $_error
+}
+
 function checkProject() {
 	_dir_sources="$1";
 	_dir_tmp="$2";
@@ -385,20 +419,6 @@ function checkProject() {
   if [ "$?" != "0" ]; then _error=1; fi
   checkRule "$BAD_CONFIG" "$_dir_cfg/pdfmetadata.tex" "Avoid";
   if [ "$?" != "0" ]; then _error=1; fi
-
-  echo "Checking bibtex...";
-  python lib/resources/scripts/bibtex_check_0.2.0.py -i "${_dir_tmp}/$(basename $_file_main .tex)".bib -a "${_dir_tmp}/$(basename $_file_main .tex)".aux
-  issues="$(grep -Eo 'problems: [0-9]{1,4}' bibtex_check.html|grep -Eo "[0-9]{1,4}")"
-  if [ "0" -ne "$issues" ]; then
-    echo "Found $issues issues in bibtex_check.html"
-    _error=1
-  fi
-  biber -T -V "${_dir_tmp}/$(basename $_file_main .tex)" | grep -Ev "mendeley|INFO|Duplicate" > bibtex_check.txt
-  issues="$(cat bibtex_check.txt|wc -l)"
-  if [ "0" -ne "$issues" ]; then
-    echo "Found $issues issues in bibtex_check.txt"
-    _error=1
-  fi
 
   echo "Checking todos...";
   for file in $_dir_sources/*.tex; do

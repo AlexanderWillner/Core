@@ -5,6 +5,7 @@ help:
 	@echo " * quicker : Update the PDF file (just run LaTeX twice)"
 	@echo " * quick   : Update the PDF file (just run LaTeX once)"
 	@echo " * bib     : Update the bib file (just run BibTeX/biber once)"
+	@echo " * bibchk  : Run some checks (e.g. biber, bibtex-check)"
 	@echo " * verify  : Run some checks (e.g. l2tabu)"
 	@echo " * spell   : Check for spelling errors (aspell)"
 	@echo " * eval    : Run evaluation scripts (e.g. R)"
@@ -23,7 +24,7 @@ clean:
 all: generate
 	@./build.sh -b
 
-full: 
+full:
 	@./build.sh -b
 
 quick:
@@ -34,6 +35,9 @@ quicker:
 
 bib:
 	@./build.sh -i
+
+bibchk:
+	@./build.sh -w
 
 verify:
 	@./build.sh -v
