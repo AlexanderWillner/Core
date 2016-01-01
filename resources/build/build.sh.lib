@@ -371,16 +371,16 @@ function checkBib() {
   _error=0;
 
   echo "Checking bibtex...";
-  python lib/resources/scripts/bibtex_check_0.2.0.py -i "${_dir_tmp}/$(basename $_file_main .tex)".bib -a "${_dir_tmp}/$(basename $_file_main .tex)".aux
-  issues="$(grep -Eo 'problems: [0-9]{1,4}' bibtex_check.html|grep -Eo "[0-9]{1,4}")"
+  python lib/resources/scripts/biblatex_check.py -b "${_dir_tmp}/$(basename $_file_main .tex)".bib -a "${_dir_tmp}/$(basename $_file_main .tex)".aux
+  issues="$(grep -Eo 'problems: [0-9]{1,4}' biblatex_check.html|grep -Eo "[0-9]{1,4}")"
   if [ "0" -ne "$issues" ]; then
-    echo "Found $issues issues in bibtex_check.html"
+    echo "Found $issues issues in biblatex_check.html"
     _error=1
   fi
-  biber -T -V "${_dir_tmp}/$(basename $_file_main .tex)" | grep -Ev "mendeley|INFO|Duplicate" > bibtex_check.txt
-  issues="$(cat bibtex_check.txt|wc -l)"
+  biber -T -V "${_dir_tmp}/$(basename $_file_main .tex)" | grep -Ev "mendeley|INFO|Duplicate" > biber_check.txt
+  issues="$(cat biber_check.txt|wc -l)"
   if [ "0" -ne "$issues" ]; then
-    echo "Found $issues issues in bibtex_check.txt"
+    echo "Found $issues issues in biber.txt"
     _error=1
   fi
 
@@ -580,10 +580,11 @@ function doLatex() {
 function doBibtex() {
 	_dir_tmp="$1";
 	_file_main="$2";
-    _file_bib="$3";
-    _dir_res="$4";
-    _ext="$5";
-    echo -n "Running BibTeX and Glossary...";
+  _file_bib="$3";
+  _dir_res="$4";
+  _ext="$5";
+  echo -n "Running BibTeX and Glossary...";
+
     startLogging;
     cp -r "$_dir_res" "$_dir_tmp";
     cp "$_file_bib" "$_dir_tmp";
@@ -594,8 +595,9 @@ function doBibtex() {
     cp *.cls "$_dir_tmp";
     cd "$_dir_tmp";
     file_bibtex=`basename $_file_main .tex`"$_ext";
-    makeglossaries $file_bibtex;
-    $BIN_BIB $file_bibtex;
+
+    makeglossaries $file_bibtex
+    $BIN_BIB $file_bibtex
     errorlevel=$?
     found=`$BIN_BIB $file_bibtex | grep -iE "warn|illegal|repeated|skipping|couldn't" | grep -v junk`
     cd -
