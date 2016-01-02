@@ -377,10 +377,10 @@ function checkBib() {
     echo "Found $issues issues in biblatex_check.html"
     _error=1
   fi
-  biber -T -V "${_dir_tmp}/$(basename $_file_main .tex)" | grep -Ev "mendeley|INFO|Duplicate" > biber_check.txt
+  biber -T -V "${_dir_tmp}/$(basename $_file_main .tex)" | grep -Ev "mendeley|INFO|Duplicate|junk|arxivid|Invalid field 'publisher'|Invalid field 'publisher'|Missing mandatory field 'editor'" > biber_check.txt
   issues="$(cat biber_check.txt|wc -l)"
   if [ "0" -ne "$issues" ]; then
-    echo "Found $issues issues in biber.txt"
+    echo "Found $issues issues in biber_check.txt"
     _error=1
   fi
 
@@ -568,7 +568,7 @@ function doLatex() {
       $_option \
 	  -shell-escape \
 	  -interaction=nonstopmode \
-	   -file-line-error \
+	  -file-line-error \
 	  -output-directory $_dir_tmp \
 	  $_file_main
 	errorlevel=$?
