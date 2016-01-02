@@ -57,7 +57,7 @@ requiredFields = {"article": ["author", "title", "journaltitle", "year/date"],
                   "unpublished": ["author", "title", "year/date"],
 
                   # semi aliases (differing fields)
-                  "mastersthesis": ["author", "title", "institution", "year/date"],
+                  "mastersthesis": ["author", "title", "school", "year/date"],
                   "techreport": ["author", "title", "institution", "year/date"],
 
                   # other aliases
