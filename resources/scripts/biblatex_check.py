@@ -578,5 +578,3 @@ html.close()
 if view:
     import webbrowser
     webbrowser.open(html.name)
-
-print("SUCCESS: Report {} has been generated".format(htmlOutput))

@@ -405,8 +405,17 @@ function checkProject() {
   echo "Running chktex...";
   checkEnvironment chktex && chktex -q "${_file_main}"
 
-  #echo "Checking for missed acronyms...";
-  #grep -HIrnsE "^[^%].* [A-Z]{4,}[ |s]" $_dir_sources/|grep -v caption
+  # Helper function to find unreferenced labels, since the chkltex tool and the refcheck package do not support cleveref
+  # Note: this could show false positives sometimes
+  echo "Checking for unreferenced labels...";
+  labels=$(grep -Eo '^[\s]*[^%]+.*label{[^}]+}' $_dir_sources/*.tex|sed -Ee "s/^.*{(.*)}/\1/g")
+  for label in $labels; do
+    found=$(grep -E "ref{[^}]*$label" $_dir_sources/*.tex)
+    if [[ -z "$found" ]]; then
+      echo "Label '$label' not referenced?";
+      _error=1
+    fi
+  done
 
   # note that this somehow shows false positives sometimes :/
   echo "Checking for duplicated/repeated words...";
@@ -486,6 +495,10 @@ function checkProject() {
   done
 
   # too restrictive
+  #echo "Checking for missed acronyms...";
+  #grep -HIrnsE "^[^%].* [A-Z]{4,}[ |s]" $_dir_sources/|grep -v caption
+
+  # too restrictive
   #echo "Checking general...";
   #for file in $_dir_sources/*.tex; do
   #  checkRule "$AVOID" "$file" "Avoid" true;
@@ -514,7 +527,8 @@ function showHelp() {
 function showWarnings() {
     #WARNINGS=`grep -i warning $FILE_LOG|grep -v ifpdftex`;
 	#WARNINGS=`grep -iE "^! |Warning|Overfull|Underfull" $FILE_LOG|grep -vE "addtolists|tocbasic|selectfont|fontenc|pickup@font|scrhack|float@listhead|minitoc|expanded"`;
-  WARNINGS=`grep -A2 -B2 -iE "^! |Warning" $FILE_LOG|grep -vE "addtolists|tocbasic|selectfont|fontenc|pickup@font|scrhack|float@listhead|minitoc|expanded|Unsupported"`;
+  #WARNINGS=$(grep -vE "Unused label \`ac:" $FILE_LOG|grep -A2 -B2 -iE "^! |Warning"|grep -vE "addtolists|tocbasic|selectfont|fontenc|pickup@font|scrhack|float@listhead|minitoc|expanded|Unsupported");
+  WARNINGS=$(grep -vE "Unused label \`ac:|Unused label \`sub|addtolists|tocbasic|selectfont|fontenc|pickup@font|scrhack|float@listhead|minitoc|expanded|Unsupported" $FILE_LOG|grep -A2 -B2 -iE "^! |Warning");
     if [ "$WARNINGS" != "" ]; then
       echo "-------------";
       cat "$WARNINGS";
