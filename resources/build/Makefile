@@ -17,6 +17,7 @@ help:
 	@echo " * rename  : Rename project"
 	@echo " * unicode : Find incompatible unicode characters"
 	@echo " * optimize: Optimize output (e.g. optipng)"
+	@echo " * sign    : Sign the PDF using an X.509 certificate"
 
 clean:
 	@./build.sh -c
@@ -65,6 +66,9 @@ unicode:
 
 optimize:
 	@./build.sh -z
+
+sign:
+	@./build.sh -x
 
 rename:
 	@./build.sh -n

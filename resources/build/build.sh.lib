@@ -39,7 +39,8 @@ function endLogging() {
 function doDefaultProject() {
     if [ "$verify" ] || [ "$build" ] || [ "$quick" ] || [ "$quicker" ] || [ "$dobib" ] || \
        [ "$clean" ] || [ "$spelling" ] || [ "$eval" ] || [ "$generate" ] || [ "$deploy" ] || \
-       [ "$open" ] || [ "$ci" ] || [ "$unicode" ] || [ "$optimize" ] || [ "$rename" ] || [ "$bibcheck" ]; then
+       [ "$open" ] || [ "$ci" ] || [ "$unicode" ] || [ "$optimize" ] || [ "$rename" ] || \
+       [ "$bibcheck" ] || [ "$sign" ]; then
 
         if [ "$rename" ]; then
             rename
@@ -47,6 +48,10 @@ function doDefaultProject() {
 
         if [ "$optimize" ]; then
             optimize "$DIR_IMG"
+        fi;
+
+        if [ "$sign" ]; then
+            sign "$FILE_BASE" "$FILE_CERT"
         fi;
 
         if [ "$unicode" ]; then
@@ -166,8 +171,8 @@ function checkParameter() {
   SYNTAX="Syntax: $0 [-c (clean)] [-b (build)] [-i (bIbtex)] [-r (quicker build)] [-q (quick build)] [-v (verify)] \
      [-w (bib checking)] [-s (spell checking)] [-e (run the evaluation)] [-g (generate images etc.)] \
      [-d (deploy)] [-o (open)] [-f (continuous integration)] [-u (unicode check)] \
-     [-z (optimize)] [-n (rename)] [-h (help)]";
-  while getopts ":qrchvsbiegdfounwz" optname
+     [-z (optimize)] [-x (X.509 signature)] [-n (rename)] [-h (help)]";
+  while getopts ":qrchvsbiegdfounwzx" optname
   do
     case "$optname" in
       "q")
@@ -215,6 +220,9 @@ function checkParameter() {
       "z")
         optimize=1;
         ;;
+      "x")
+        sign=1;
+        ;;
       "n")
         rename=1;
         ;;
@@ -240,6 +248,16 @@ function optimize() {
 
   checkEnvironment optipng && find ${_dir_resources} -iname "*.png" -exec optipng {} \;
   checkEnvironment jpegoptim && find ${_dir_resources} -iname "*.jpg" -exec jpegoptim -o -p {} \;
+}
+
+function sign() {
+	_file_base="$1";
+  _file_cert="$2";
+
+  [ "" == "${_file_cert}" ] && echo "ERROR: FILE_CERT not set" && exit 1
+  [ ! -f "${_file_cert}" ] && echo "ERROR: '${_file_cert}' not a file" && exit 1
+  checkEnvironment java && java -jar lib/resources/scripts/PortableSigner.jar -t "${_file_base}.pdf" -o "${_file_base}-signed.pdf" -s "${_file_cert}" -n
+  #[ "1" == "$DOOPT" ] && [ -n "$BIN_PDF" ] && ( $BIN_PDF --linearize "${_file_base}-signed.pdf" "${_file_base}-signed-opt.pdf" )
 }
 
 function rename() {
