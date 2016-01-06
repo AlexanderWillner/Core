@@ -607,14 +607,14 @@ function doBibtex() {
     cp *.bib "$_dir_tmp";
     cp *.bst "$_dir_tmp";
     cp *.cls "$_dir_tmp";
-    cd "$_dir_tmp";
+    cd "$_dir_tmp" || ( echo "dir not found" ; exit 1)
     file_bibtex=`basename $_file_main .tex`"$_ext";
 
     makeglossaries $file_bibtex
     $BIN_BIB $file_bibtex
     errorlevel=$?
     found=`$BIN_BIB $file_bibtex | grep -iE "warn|illegal|repeated|skipping|couldn't" | grep -v junk`
-    cd -
+    cd - || ( echo "dir not found" ; exit 1)
 	endLogging;
     if [ "$found" != "" ]; then
     	echo "warning: BibTeX: $found";
@@ -642,7 +642,7 @@ function doGraphviz() {
 	echo -n "Graphviz...";
 	[ "`ls $_dir_img/*.gv 2>/dev/null`" == "" ] && echo "skipped" && return
 	startLogging;
-	for gv in `ls $_dir_img/*.gv`; do
+	for gv in $_dir_img/*.gv; do
         file=${gv##*/}
                 file=${file%%.*}
 		dot -Tps2 -o $_dir_img/$file.ps $gv;
@@ -679,14 +679,14 @@ function doGnuPlot() {
 	errorlevel=0;
 	echo -n "Gnuplot...";
 	[ "`ls $_dir_img/*.gv 2>/dev/null`" == "" ] && echo "skipped" && return
-	cd $_dir_img;
+	cd $_dir_img  || ( echo "dir not found" ; exit 1)
 	startLogging;
-	for plt in `ls *.plt`; do
+	for plt in *.plt; do
 		gnuplot $plt;
 		errorlevel=$?
 		if [ "$errorlevel" != "0" ]; then break; fi
 	done
-	cd -
+	cd - || ( echo "dir not found" ; exit 1)
 	endLogging;
 	checkError $errorlevel;
 	echo "done";
@@ -698,13 +698,13 @@ function doPlotR() {
 	echo -n "R...";
 	[ "`ls $_dir_img/*.R 2>/dev/null`" == "" ] && echo "skipped" && return
     startLogging;
-    cd $_dir_img;
-    for r in `ls *.R`; do
+    cd $_dir_img || ( echo "dir not found" ; exit 1)
+    for r in *.R; do
     	Rscript $r;
 		errorlevel=$?
 		if [ "$errorlevel" != "0" ]; then break; fi
     done
-    cd -
+    cd - || ( echo "dir not found" ; exit 1)
     endLogging;
     checkError $errorlevel;
     echo "done";
@@ -714,14 +714,15 @@ function doEvaluation() {
 	_dir_scr=$1
 	_dir_ana=$2
     startLogging;
+    # shellcheck source=../scripts/workDispatcher
     source "$_dir_scr/workDispatcher"
-    cd $_dir_ana
+    cd $_dir_ana || ( echo "dir not found" ; exit 1)
     _cmd='Rscript'
-    for r in `ls *.R`; do
+    for r in *.R; do
 		echo $r
 	done | dispatchWork
 	errorlevel=$?
-    cd -
+    cd - || ( echo "dir not found" ; exit 1)
     endLogging;
     checkError $errorlevel;
 }
@@ -742,8 +743,8 @@ COMMAS="However\s+#In fact\s+#Therefore\s+#Nevertheless\s+#Moreover\s+#Furthermo
 REFS='[^\\]section[^A-Za-z\.,;\}\(]+\\#figure[^A-Za-z\.,;\}\(]+\\#equation[^A-Za-z\.,;\}\(]+\\#table[^A-Za-z\.,;\}\(]+\\';
 MISTAKES='test bed#test-bed#caption.*\\[aA]c';
 MISTAKES_CS='\bwebservice\b#\bweb service\b#\bMiddleware\b#\bArgon[^:]\b#\binternet\b';
-AVOID="clearly#obviously#actually#\$i-th\$#etc\.#\.e\.#e\.g\.[^,]#[^,]\s{,1}respectively#Therefore[^,]#thus[^,]#related works#following (figure\b|fig\.)#[^~](\s*)\\\ref#\bkbps#\bmbps#\bmsec#recent advances in# don't#doesn't#we've#won't#it's#That's because#optimally#Equation(~|\s*)\\\ref#\still\s#make assumption#is a function of#is an illustration#is a requirement#utilizes#had difference#\\\$[0-9]+\\\$#\\\cite{.*}\\s\\\cite#\bgut\b#\bschlecht\b#\bschön\b#\bfurchtbar\b#\bdumm\b#\bwahr\b#\bfalsch\b#\bperfekt\b#\bideal\b#\bheutzutage\b#\bmodern\b#\bbald\b#\büberrascht\b#\bscheint\b#\bbasiert\b#\bviele\b#\beinige\b#\bähnlich\b#\bwahrscheinlich\b#\bselbstverständlich\b#\bklar\b#\bwirklich\b#\beinfach\b#\bdieses\b#\bjenes\b#\bwir\b#\bhoffentlich\b#\bbekannt\b#\bberühmt\b#\bmuss\b#\bman\b#\b\bhalt\b\b#\bimmer\b#\bsollte\b#\bbeweis\b#\bzeigt\b#\bkann\b#\bsollte\b#\bmüsste\b#\bsoon\b#\bbald\b#\bperfect\b#\bperfekt\b#\bseems\b#\bscheint\b#\blots of\b#\bkind of\b#\btype of\b#\bsomethink like\b#\bprobably\b#\balong with\b#\bwould seem to show\b#\ban ideal solution\b#\bbad\b#\bnice\b#\bstupid\b#\bmodern times\b#\btoday\b#\ba famous researcher\b#\bsimple\b#z\.B\.#d\.h\.#z\.Z\.#u\.a\.#\\\caption.*\\\ac"
-MACROS="\bPreface\b#\bVorwort\b#\bReferences\b#\bLiteratur\b#\bBibliography\b#\bLiteraturverzeichnis\b#\bAppendix\b#\bAnhang\b#\bContents\b#\bInhaltsverzeichnis\b#\bList of Figures\b#\bAbbildungsverzeichnis\b#\bList of Tables\b#\bTabellenverzeichnis\b#\bFigure|Fig\.[^A-Za-z\.,;]+#\bAbbildung|Abb\.[^A-Za-z\.,;]+#\bTable|Tab\.[^A-Za-z\.,;]+#\bTabelle[^A-Za-z\.,;]+#\bEquation|Eq\.[^A-Za-z\.,;]+#\bSection|Seq\.[^A-Za-z\.,;]+#\bPart\b#\bTeil\b#\bencl\b#\bAnlage(n)\b#\bVerteiler\b#\bPage\b#\bSeite\b#\bsee also\b#\bsiehe auch\b";
+#AVOID="clearly#obviously#actually#\$i-th\$#etc\.#\.e\.#e\.g\.[^,]#[^,]\s{,1}respectively#Therefore[^,]#thus[^,]#related works#following (figure\b|fig\.)#[^~](\s*)\\\ref#\bkbps#\bmbps#\bmsec#recent advances in# don't#doesn't#we've#won't#it's#That's because#optimally#Equation(~|\s*)\\\ref#\still\s#make assumption#is a function of#is an illustration#is a requirement#utilizes#had difference#\\\$[0-9]+\\\$#\\\cite{.*}\\s\\\cite#\bgut\b#\bschlecht\b#\bschön\b#\bfurchtbar\b#\bdumm\b#\bwahr\b#\bfalsch\b#\bperfekt\b#\bideal\b#\bheutzutage\b#\bmodern\b#\bbald\b#\büberrascht\b#\bscheint\b#\bbasiert\b#\bviele\b#\beinige\b#\bähnlich\b#\bwahrscheinlich\b#\bselbstverständlich\b#\bklar\b#\bwirklich\b#\beinfach\b#\bdieses\b#\bjenes\b#\bwir\b#\bhoffentlich\b#\bbekannt\b#\bberühmt\b#\bmuss\b#\bman\b#\b\bhalt\b\b#\bimmer\b#\bsollte\b#\bbeweis\b#\bzeigt\b#\bkann\b#\bsollte\b#\bmüsste\b#\bsoon\b#\bbald\b#\bperfect\b#\bperfekt\b#\bseems\b#\bscheint\b#\blots of\b#\bkind of\b#\btype of\b#\bsomethink like\b#\bprobably\b#\balong with\b#\bwould seem to show\b#\ban ideal solution\b#\bbad\b#\bnice\b#\bstupid\b#\bmodern times\b#\btoday\b#\ba famous researcher\b#\bsimple\b#z\.B\.#d\.h\.#z\.Z\.#u\.a\.#\\\caption.*\\\ac"
+#MACROS="\bPreface\b#\bVorwort\b#\bReferences\b#\bLiteratur\b#\bBibliography\b#\bLiteraturverzeichnis\b#\bAppendix\b#\bAnhang\b#\bContents\b#\bInhaltsverzeichnis\b#\bList of Figures\b#\bAbbildungsverzeichnis\b#\bList of Tables\b#\bTabellenverzeichnis\b#\bFigure|Fig\.[^A-Za-z\.,;]+#\bAbbildung|Abb\.[^A-Za-z\.,;]+#\bTable|Tab\.[^A-Za-z\.,;]+#\bTabelle[^A-Za-z\.,;]+#\bEquation|Eq\.[^A-Za-z\.,;]+#\bSection|Seq\.[^A-Za-z\.,;]+#\bPart\b#\bTeil\b#\bencl\b#\bAnlage(n)\b#\bVerteiler\b#\bPage\b#\bSeite\b#\bsee also\b#\bsiehe auch\b";
 BAD_ABSTRACT="\cite#\equation#in this paper";
 BAD_INTRO="recent advances in#growth of the Internet";
 TODOS="todo#fixme#tbd";
