@@ -486,6 +486,12 @@ function checkProject() {
   _file_pdf="$FILE_PDF";
 	_error=0
 
+  echo "Running chktex...";
+  checkEnvironment chktex && chktex -q "${_file_main}"
+
+  echo "Checking for unicode issues...";
+  checkUnicode $_dir_sources/
+
   echo "Finding unused figures..."
   for image in $DIR_IMG/*; do
     filename=$(basename "$image")
@@ -500,9 +506,6 @@ function checkProject() {
       fi
     fi
   done
-
-  echo "Running chktex...";
-  checkEnvironment chktex && chktex -q "${_file_main}"
 
   # Helper function to find unreferenced labels, since the chkltex tool and the refcheck package do not support cleveref
   # Note: this could show false positives sometimes
@@ -603,10 +606,6 @@ function checkProject() {
   #  checkRule "$AVOID" "$file" "Avoid" true;
   #  if [ "$?" != "0" ]; then _error=1; fi
   #done
-
-  # too restrictive
-  #echo "Checking for unicode issues...";
-  #checkUnicode $_dir_sources/
 
   # too restrictive
   #echo "Checking macros...";
