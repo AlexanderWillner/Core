@@ -245,9 +245,31 @@ function checkParameter() {
 
 function optimize() {
 	_dir_resources="$1";
+  :> optimize.log
 
-  checkEnvironment optipng && find ${_dir_resources} -iname "*.png" -exec optipng {} \;
-  checkEnvironment jpegoptim && find ${_dir_resources} -iname "*.jpg" -exec jpegoptim -o -p {} \;
+  echo "Embedding fonts into PDFs..."
+  checkEnvironment gs || exit 1
+  for pdf in ${DIR_IMG}/*.pdf; do
+    list=$(pdffonts "${pdf}" 2>&1|awk -F '[[:space:]][[:space:]]+' '{print $4}'|awk '{print $1}')
+    for embedded in $list; do
+      if [ "${embedded}" == "no" ]; then
+        filename="${pdf}"
+      else
+        filename=""
+      fi
+    done
+    if [ ! -z "${filename}" ]; then
+      echo "Embedding fonts for '${filename}'..."
+      gs -o "${filename}.embedded" -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress ${filename} >> optimize.log 2>&1 && \
+      mv "${filename}.embedded" ${filename}
+    fi
+  done
+
+  echo "Optimizing PNGs..."
+  checkEnvironment optipng && find ${_dir_resources} -iname "*.png" -exec optipng {} >> optimize.log 2>&1 \;
+
+  echo "Optimizing JPGs..."
+  checkEnvironment jpegoptim && find ${_dir_resources} -iname "*.jpg" -exec jpegoptim -o -p {} >> optimize.log 2>&1 \;
 }
 
 function sign() {
@@ -418,7 +440,40 @@ function checkProject() {
   #TODO: refactor this!
 	#_dir_cfg="$10";
   _dir_cfg="$DIR_CFG";
-	_error=0;
+  _file_pdf="$FILE_PDF";
+	_error=0
+  _count=0
+
+  echo "Looking for non-embedded fonts..."
+  list=$(pdffonts "${_file_pdf}"|awk -F '[[:space:]][[:space:]]+' '{print $4}'| awk '{print $1}')
+  for embedded in $list; do
+    if [ "${embedded}" == "no" ]; then
+      _count=$((_count+1))
+    fi
+  done
+  if [ "${_count}" != "0" ]; then
+    echo "Found ${_count} fonts that are not embedded. Run 'pdffonts ${_file_pdf}' for details. Consider to run 'make optimize'"
+    _error=1
+  fi
+
+  # Move to a preflight target
+  # echo "Looking transparency in PDFs..."
+  # for pdf in ${DIR_IMG}/*.pdf; do
+  #   transparent=$(grep -aE -e '/[Cc][Aa] +0?\.[0-9]' -e '/SMask' -e '/S /Transparency' ${pdf})
+  #   if [ ! -z "$transparent" ]; then
+  #     echo "WARNING: File ${pdf} contains transparency. Consider to fix it my using 'gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.3 ...'"
+  #     open ${pdf}
+  #     _error=1
+  #   fi
+  # done
+
+  # Move to a preflight target
+  # echo "Looking for RGB color profiles..."
+  # rgb=$(pdfimages -list ${_file_pdf}|grep -i rgb)
+  # if [ ! -z "${rgb}" ]; then
+  #   echo "WARNING: Found an RGB color profile.";
+  #   _error=1
+  # fi
 
   echo "Running chktex...";
   checkEnvironment chktex && chktex -q "${_file_main}"
@@ -430,7 +485,7 @@ function checkProject() {
   for label in $labels; do
     found=$(grep -E "ref{[^}]*$label" $_dir_sources/*.tex)
     if [[ -z "$found" ]]; then
-      echo "Label '$label' not referenced?";
+      echo "WARNING: Label '$label' not referenced?";
       _error=1
     fi
   done
