@@ -292,14 +292,14 @@ function preflight() {
     fi
   done
   if [ "${_count}" != "0" ]; then
-    echo "WARNING: Found ${_count} fonts that are not embedded. Run 'pdffonts ${_file_pdf}' for details. Consider to run 'make optimize'"
+    echo "WARNING: Found ${_count} fonts that are not embedded. Run 'pdffonts ${_file_pdf}' for details. Consider to run 'make optimize' ..."
     _error=1
   fi
 
   echo "Looking for ICC color profiles..."
   icc=$(pdfimages -list ${_file_pdf}|grep -i icc)
   if [ ! -z "${icc}" ]; then
-     echo "WARNING: Found an ICC color profile.";
+     echo "WARNING: Found an ICC color profile. Run 'pdfimages -list ${_file_pdf}' for details.";
      _error=1
   fi
 
