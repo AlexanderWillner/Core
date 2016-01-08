@@ -546,7 +546,7 @@ function showWarnings() {
     #WARNINGS=`grep -i warning $FILE_LOG|grep -v ifpdftex`;
 	#WARNINGS=`grep -iE "^! |Warning|Overfull|Underfull" $FILE_LOG|grep -vE "addtolists|tocbasic|selectfont|fontenc|pickup@font|scrhack|float@listhead|minitoc|expanded"`;
   #WARNINGS=$(grep -vE "Unused label \`ac:" $FILE_LOG|grep -A2 -B2 -iE "^! |Warning"|grep -vE "addtolists|tocbasic|selectfont|fontenc|pickup@font|scrhack|float@listhead|minitoc|expanded|Unsupported");
-  WARNINGS=$(grep -vE "Unused label \`ac:|Unused label \`sub|addtolists|tocbasic|selectfont|fontenc|pickup@font|scrhack|float@listhead|minitoc|expanded|Unsupported" $FILE_LOG|grep -A2 -B2 -iE "^! |Warning");
+  WARNINGS=$(grep -vE "Unused label \`ac:|Unused label \`sub|addtolists|tocbasic|selectfont|fontenc|pickup@font|scrhack|float@listhead|minitoc|expanded|Unsupported|ALPHA VERSION!" $FILE_LOG|grep -A2 -B2 -iE "^! |Warning");
     if [ "$WARNINGS" != "" ]; then
       echo "-------------";
       cat "$WARNINGS";

@@ -82,6 +82,7 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 %\usepackage{lmodern}                 % Nicer fonts (for all)
 \usepackage{ltxtable}                 % Long complex tables
 \usepackage{ltablex}                  % Long complex tables
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
 \usepackage[switch*,modulo]{lineno}   % Show line numbers
 \usepackage{blindtext}                % insert blind texts
 %\usepackage{cleveref}                 % To ref footnotes twice (use after hyperref)
@@ -120,6 +121,9 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 \providecommand*{\toclevel@title}{99}
 \providecommand*{\toclevel@author}{99}
 
+\usepackage[tocindentauto]{tocstyle}      % fixing large roman page letters in ToC
+\usetocstyle{standard}                    % same layout as before
+\settocstylefeature{pagenumberbox}{\hbox} % fixing large roman page letters in ToC
 % type setting ----------------------------------------------------------------
 % no "Schusterjungen"
     \clubpenalty=10000
