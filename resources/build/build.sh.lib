@@ -352,7 +352,8 @@ function checkUnicode() {
     if [ $_pcreExists ]; then _cmd="pcregrep"; else _cmd="grep -P"; fi
 
 	find ${_dir_sources}  \( -iname "*.tex" -o -iname "*.txt" \)  -exec \
-	  $_cmd -H --color='auto' -n "[\x80-\xFF]" {} \;
+    $_cmd -H --color='auto' -n "^\s*[^%]+[^\x01-\x80äöüßÄÖÜÉÁÓÚúóéá€]" {} \;
+	  #$_cmd -H --color='auto' -n "^\s*[^%]+[\x80-\xFF]" {} \;
 }
 
 function checkEnvironment() {
