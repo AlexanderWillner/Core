@@ -284,6 +284,15 @@ function preflight() {
   _dir_img="$2"
   _count=0
 
+  echo "Looking for incompatible PDF versions..."
+  for pdf in ${_dir_img}/*.pdf; do
+    incompatible="$(pdfinfo ${pdf}|grep "PDF version"|awk '{if ($3>1.4) print $3}')"
+    if [ ! -z "${incompatible}" ]; then
+      echo "WARNING: file '$pdf' uses PDF version ${incompatible}, which is higher than 1.4"
+      _error=1
+    fi
+  done
+
   echo "Looking for non-embedded fonts..."
   list=$(pdffonts "${_file_pdf}"|awk -F '[[:space:]][[:space:]]+' '{print $4}'| awk '{print $1}')
   for embedded in $list; do
