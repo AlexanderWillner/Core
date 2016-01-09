@@ -294,23 +294,27 @@ function preflight() {
   done
 
   echo "Looking for non-embedded fonts..."
-  list=$(pdffonts "${_file_pdf}"|awk -F '[[:space:]][[:space:]]+' '{print $4}'| awk '{print $1}')
-  for embedded in $list; do
-    if [ "${embedded}" == "no" ]; then
-      _count=$((_count+1))
+  for pdf in ${_dir_img}/*.pdf; do
+    list=$(pdffonts "${pdf}"|awk -F '[[:space:]][[:space:]]+' '{print $4}'| awk '{print $1}')
+    for embedded in $list; do
+      if [ "${embedded}" == "no" ]; then
+        _count=$((_count+1))
+      fi
+    done
+    if [ "${_count}" != "0" ]; then
+      echo "WARNING: Found ${_count} fonts that are not embedded in '$pdf'. Run 'pdffonts ${pdf}' for details. Consider to run 'make optimize' ..."
+      _error=1
     fi
   done
-  if [ "${_count}" != "0" ]; then
-    echo "WARNING: Found ${_count} fonts that are not embedded. Run 'pdffonts ${_file_pdf}' for details. Consider to run 'make optimize' ..."
-    _error=1
-  fi
 
   echo "Looking for ICC color profiles..."
-  icc=$(pdfimages -list ${_file_pdf}|grep -i icc)
-  if [ ! -z "${icc}" ]; then
-     echo "WARNING: Found an ICC color profile. Run 'pdfimages -list ${_file_pdf}' for details.";
-     _error=1
-  fi
+  for pdf in ${_dir_img}/*.pdf; do
+    icc=$(pdfimages -list ${pdf}|grep -i icc)
+    if [ ! -z "${icc}" ]; then
+       echo "WARNING: Found an ICC color profile in '$pdf'. Run 'pdfimages -list ${pdf}' for details.";
+       _error=1
+    fi
+  done
 
   echo "Looking transparency in PDFs..."
   for pdf in ${_dir_img}/*.pdf; do
