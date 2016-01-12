@@ -254,29 +254,42 @@ function optimize() {
 	_dir_resources="$1";
   :> optimize.log
 
-  echo "Embedding fonts into PDFs..."
+  echo "Optimizing PDFs..."
   checkEnvironment gs || exit 1
+  checkEnvironment pdfopt || exit 1
+  #for pdf in ${DIR_IMG}/*.pdf; do
+  #  list=$(pdffonts "${pdf}" 2>&1|awk -F '[[:space:]][[:space:]]+' '{print $4}'|awk '{print $1}')
+  #  for embedded in $list; do
+  #    if [ "${embedded}" == "no" ]; then
+  #      filename="${pdf}"
+  #    else
+  #      filename=""
+  #    fi
+  #  done
+  #  if [ ! -z "${filename}" ]; then
+  #    echo "Embedding fonts for '${filename}'..."
   for pdf in ${DIR_IMG}/*.pdf; do
-    list=$(pdffonts "${pdf}" 2>&1|awk -F '[[:space:]][[:space:]]+' '{print $4}'|awk '{print $1}')
-    for embedded in $list; do
-      if [ "${embedded}" == "no" ]; then
-        filename="${pdf}"
-      else
-        filename=""
-      fi
-    done
-    if [ ! -z "${filename}" ]; then
-      echo "Embedding fonts for '${filename}'..."
-      gs -o "${filename}.embedded" -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress ${filename} >> optimize.log 2>&1 && \
-      mv "${filename}.embedded" ${filename}
-    fi
+        echo "Optimizing $pdf..."
+        gs -o "${pdf}.optimized.pdf" \
+        -dBATCH -dNOPAUSE \
+        -sDEVICE=pdfwrite \
+        -dDetectDuplicateImages=true \
+        -dCompressFonts=true \
+        -dSubsetFonts=true \
+        -dEmbedAllFonts=true \
+        -dCompressPages=true \
+        -dPDFSETTINGS=/prepress \
+        ${pdf} >> optimize.log 2>&1 && \
+        mv "${pdf}.optimized.pdf" ${pdf} || ( echo "ERROR: $pdf"; exit 1; )
   done
+  #  fi
+  #done
 
   echo "Optimizing PNGs..."
-  checkEnvironment optipng && find ${_dir_resources} -iname "*.png" -exec optipng {} >> optimize.log 2>&1 \;
+  checkEnvironment optipng && find ${_dir_resources} -iname "*.png" -exec echo "Optimizing {}..." \; -exec optipng {} >> optimize.log 2>&1 \;
 
   echo "Optimizing JPGs..."
-  checkEnvironment jpegoptim && find ${_dir_resources} -iname "*.jpg" -exec jpegoptim -o -p {} >> optimize.log 2>&1 \;
+  checkEnvironment jpegoptim && find ${_dir_resources} -iname "*.jpg" -exec echo "Optimizing {}..." \; -exec jpegoptim -o -p {} >> optimize.log 2>&1 \;
 }
 
 function preflight() {
@@ -496,7 +509,6 @@ function checkProject() {
   #TODO: refactor this!
 	#_dir_cfg="$10";
   _dir_cfg="$DIR_CFG";
-  _file_pdf="$FILE_PDF";
 	_error=0
 
   echo "Running chktex...";
