@@ -295,9 +295,9 @@ function preflight() {
 
   echo "Looking for incompatible PDF versions..."
   for pdf in ${_dir_img}/*.pdf; do
-    incompatible="$(pdfinfo ${pdf}|grep "PDF version"|awk '{if ($3>1.4) print $3}')"
-    if [ ! -z "${incompatible}" ]; then
-      echo "WARNING: file '$pdf' uses PDF version ${incompatible}, which is higher than 1.4"
+    version="$(pdfinfo ${pdf}|grep "PDF version"|awk '{print $3}')"
+    if [ $(bc <<< "1.4 <= ${version} > 1.4") -eq 1 ]; then
+      echo "WARNING: file '${pdf}' uses PDF version ${version}, which is higher than 1.4"
       _error=1
     fi
   done
