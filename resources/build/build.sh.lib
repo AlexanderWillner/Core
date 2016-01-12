@@ -257,33 +257,29 @@ function optimize() {
   echo "Optimizing PDFs..."
   checkEnvironment gs || exit 1
   checkEnvironment pdfopt || exit 1
-  #for pdf in ${DIR_IMG}/*.pdf; do
-  #  list=$(pdffonts "${pdf}" 2>&1|awk -F '[[:space:]][[:space:]]+' '{print $4}'|awk '{print $1}')
-  #  for embedded in $list; do
-  #    if [ "${embedded}" == "no" ]; then
-  #      filename="${pdf}"
-  #    else
-  #      filename=""
-  #    fi
-  #  done
-  #  if [ ! -z "${filename}" ]; then
-  #    echo "Embedding fonts for '${filename}'..."
   for pdf in ${DIR_IMG}/*.pdf; do
         echo "Optimizing $pdf..."
         gs -o "${pdf}.optimized.pdf" \
-        -dBATCH -dNOPAUSE \
-        -sDEVICE=pdfwrite \
-        -dDetectDuplicateImages=true \
-        -dCompressFonts=true \
-        -dSubsetFonts=true \
-        -dEmbedAllFonts=true \
-        -dCompressPages=true \
-        -dPDFSETTINGS=/prepress \
-        ${pdf} >> optimize.log 2>&1 && \
+           -dBATCH -dNOPAUSE \
+           -sDEVICE=pdfwrite \
+           -dPDFSETTINGS=/prepress \
+           -dDetectDuplicateImages=true \
+           -dCompressFonts=true \
+           -dSubsetFonts=true \
+           -dEmbedAllFonts=true \
+           -dCompressPages=true \
+           -dAutoFilterColorImages=false \
+           -dAutoFilterGrayImages=false \
+           -dColorImageFilter=/FlateEncode \
+           -dGrayImageFilter=/FlateEncode \
+           -dColorConversionStrategy=/LeaveColorUnchanged \
+           -dDownsampleMonoImages=false \
+           -dDownsampleGrayImages=false \
+           -dDownsampleColorImages=false \
+           -dFastWebView \
+           ${pdf} >> optimize.log 2>&1 && \
         mv "${pdf}.optimized.pdf" ${pdf} || ( echo "ERROR: $pdf"; exit 1; )
   done
-  #  fi
-  #done
 
   echo "Optimizing PNGs..."
   checkEnvironment optipng && find ${_dir_resources} -iname "*.png" -exec echo "Optimizing {}..." \; -exec optipng {} >> optimize.log 2>&1 \;
