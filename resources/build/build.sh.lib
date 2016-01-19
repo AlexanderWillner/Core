@@ -316,7 +316,7 @@ function preflight() {
     fi
   done
 
-  echo "Looking for ICC color profiles..."
+  echo "Looking for ICC color profiles (might result in wrong colors in PDF/A)..."
   for pdf in ${_dir_img}/*.pdf; do
     icc=$(pdfimages -list ${pdf}|grep -i icc)
     if [ ! -z "${icc}" ]; then
@@ -325,15 +325,23 @@ function preflight() {
     fi
   done
 
-  echo "Looking transparency in PDFs..."
+  echo "Looking transparency in PDFs (forbidden in PDF/A1-b)..."
   for pdf in ${_dir_img}/*.pdf; do
     transparent=$(grep -aE -e '/[Cc][Aa] +0?\.[0-9]' -e '/SMask' -e '/S /Transparency' ${pdf})
     if [ ! -z "$transparent" ]; then
-      echo "WARNING: File ${pdf} contains transparency. Consider to fix it my using 'gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.3 ...'"
-      # open ${pdf}
+      echo "WARNING: File ${pdf} contains transparency. Remove tranparency/shadows or include a bitmap.'"
+      #mkdir -p "resources/images-vector"; if [ ! -f "resources/images-vector/$(basename ${pdf})" ]; then cp ${pdf} "resources/images-vector/$(basename ${pdf})"; fi
+      #gs -r300 -dBATCH -dNOPAUSE -sDEVICE=pdfwrite -sDEVICE=pdfwrite -dCompatibilityLevel=1.3 -sOutputFile="${pdf}" "resources/images-vector/$(basename ${pdf})"
+      #gs -q -dNOPAUSE -dBATCH -sDEVICE=pngalpha -r150 -dEPSCrop -sOutputFile="${pdf}.png" ${pdf}
       _error=1
     fi
   done
+
+  echo "Generating a PDF/A compatible files..."
+  params="-dBATCH -dNOPAUSE -q -dNOOUTERSAVE -sDEVICE=pdfwrite -dPDFACompatibilityPolicy=1 -sColorConversionStrategy=/RGB -sProcessColorModel=DeviceCMYK -dEmbedAllFonts=true -dMaxSubsetPct=100 -dSubsetFonts=true"
+  gs ${params} -dPDFA=2 -sOutputFile="pdfa2-b_${_file_pdf}" lib/resources/pdfa/PDFA_def.ps ${_file_pdf}
+  gs ${params} -dPDFA=1 -sOutputFile="pdfa1-b_${_file_pdf}" lib/resources/pdfa/PDFA_def.ps ${_file_pdf}
+   #-dFastWebView=true  # Bug 696275
 }
 
 function sign() {
