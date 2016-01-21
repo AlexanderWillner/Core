@@ -257,17 +257,25 @@ function optimize() {
   echo "Optimizing PDFs..."
   checkEnvironment gs || exit 1
   checkEnvironment pdfopt || exit 1
+  for pdf in ${DIR_IMG}/*.optimized.pdf; do
+    if [ "${pdf}" != "${DIR_IMG}/*.optimized.pdf" ]; then
+      echo "ERROR: old file '${pdf}' found"
+      exit 1
+    fi
+  done
   for pdf in ${DIR_IMG}/*.pdf; do
         echo "Optimizing $pdf..."
         gs -o "${pdf}.optimized.pdf" \
            -dBATCH -dNOPAUSE \
            -sDEVICE=pdfwrite \
+           -dCompatibilityLevel=1.4 \
            -dPDFSETTINGS=/prepress \
            -dDetectDuplicateImages=true \
            -dCompressFonts=true \
            -dSubsetFonts=true \
            -dEmbedAllFonts=true \
            -dCompressPages=true \
+           -dNOINTERPOLATE \
            -dAutoFilterColorImages=false \
            -dAutoFilterGrayImages=false \
            -dColorImageFilter=/FlateEncode \
@@ -276,9 +284,10 @@ function optimize() {
            -dDownsampleMonoImages=false \
            -dDownsampleGrayImages=false \
            -dDownsampleColorImages=false \
-           -dFastWebView \
            ${pdf} >> optimize.log 2>&1 && \
-        mv "${pdf}.optimized.pdf" ${pdf} || ( echo "ERROR: $pdf"; exit 1; )
+        mv "${pdf}.optimized.pdf" ${pdf} || ( echo "ERROR: $pdf - see optimize.log"; exit 1; )
+        # perl -pi -e 's/Interpolate true/Interpolate false/g' ${pdf} # can damage a file
+        #           -dFastWebView # GhostScript BUG 696280
   done
 
   echo "Optimizing PNGs..."
@@ -298,6 +307,15 @@ function preflight() {
     incompatible="$(pdfinfo ${pdf}|grep "PDF version"|awk '{if ($3>1.4) print $3}')"
     if [ ! -z "${incompatible}" ]; then
       echo "WARNING: file '$pdf' uses PDF version ${incompatible}, which is higher than 1.4"
+      _error=1
+    fi
+  done
+
+  echo "Looking for interpolated PDF's'..."
+  for pdf in ${_dir_img}/*.pdf; do
+    interpolated="$(strings ${pdf}|grep -i "interpolate true")"
+    if [ ! -z "${interpolated}" ]; then
+      echo "WARNING: file '$pdf' uses interpolation"
       _error=1
     fi
   done
@@ -337,7 +355,7 @@ function preflight() {
     fi
   done
 
-  echo "Generating a PDF/A compatible files..."
+  echo "Generating a PDF/A2-b compatible file..."
   params="-dBATCH -dNOPAUSE -q -dNOOUTERSAVE -sDEVICE=pdfwrite -dPDFACompatibilityPolicy=1 -sColorConversionStrategy=/RGB -sProcessColorModel=DeviceCMYK -dEmbedAllFonts=true -dMaxSubsetPct=100 -dSubsetFonts=true -dPDFSETTINGS=/prepress"
   gs ${params} -dPDFA=2 -sOutputFile="pdfa2-b_${_file_pdf}" lib/resources/pdfa/PDFA_def.ps ${_file_pdf}
   #gs ${params} -dPDFA=1 -sOutputFile="pdfa1-b_${_file_pdf}" lib/resources/pdfa/PDFA_def.ps ${_file_pdf}
