@@ -338,9 +338,9 @@ function preflight() {
   done
 
   echo "Generating a PDF/A compatible files..."
-  params="-dBATCH -dNOPAUSE -q -dNOOUTERSAVE -sDEVICE=pdfwrite -dPDFACompatibilityPolicy=1 -sColorConversionStrategy=/RGB -sProcessColorModel=DeviceCMYK -dEmbedAllFonts=true -dMaxSubsetPct=100 -dSubsetFonts=true"
+  params="-dBATCH -dNOPAUSE -q -dNOOUTERSAVE -sDEVICE=pdfwrite -dPDFACompatibilityPolicy=1 -sColorConversionStrategy=/RGB -sProcessColorModel=DeviceCMYK -dEmbedAllFonts=true -dMaxSubsetPct=100 -dSubsetFonts=true -dPDFSETTINGS=/prepress"
   gs ${params} -dPDFA=2 -sOutputFile="pdfa2-b_${_file_pdf}" lib/resources/pdfa/PDFA_def.ps ${_file_pdf}
-  gs ${params} -dPDFA=1 -sOutputFile="pdfa1-b_${_file_pdf}" lib/resources/pdfa/PDFA_def.ps ${_file_pdf}
+  #gs ${params} -dPDFA=1 -sOutputFile="pdfa1-b_${_file_pdf}" lib/resources/pdfa/PDFA_def.ps ${_file_pdf}
    #-dFastWebView=true  # Bug 696275
 }
 
