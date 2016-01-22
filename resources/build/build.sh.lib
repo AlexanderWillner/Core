@@ -269,6 +269,8 @@ function optimize() {
            -dBATCH -dNOPAUSE \
            -sDEVICE=pdfwrite \
            -dCompatibilityLevel=1.4 \
+           -dPDFA=2 \
+           -dPDFACompatibilityPolicy=1 \
            -dPDFSETTINGS=/prepress \
            -dDetectDuplicateImages=true \
            -dCompressFonts=true \
