@@ -33,11 +33,10 @@
 % ------------------------------------------------------------------------------
 
 % File encoding: Normal UTF8
-\IfPackageNotLoaded{CJKutf8}{\usepackage[utf8]{inputenc}}
-
-%\usepackage{cmap}                     % Support copy and search for pdflatex
+\usepackage{cmap}                     % Support copy and search for pdflatex
 %\input{glyphtounicode}                % Support copy and search for pdflatex
 %\pdfgentounicode=1                    % Support copy and search for pdflatex
+\IfPackageNotLoaded{CJKutf8}{\usepackage[utf8]{inputenc}}
 \usepackage{amssymb}                  % Springer Verlag (pdflatex)
 \usepackage[hyphens]{url}             % Create URLs in the document
 \usepackage[
@@ -84,6 +83,10 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 \usepackage{ltablex}                  % Long complex tables
 \newcolumntype{L}{>{\raggedright\arraybackslash}X}
 \usepackage[switch*,modulo]{lineno}   % Show line numbers
+\usepackage{accsupp}                  % Don't copy line numbers (see below)
+\renewcommand{\thelinenumber}{        % Line number printing mechanism
+  \BeginAccSupp{ActualText={}}\arabic{linenumber}\EndAccSupp{}%
+}
 \usepackage{blindtext}                % insert blind texts
 %\usepackage{cleveref}                 % To ref footnotes twice (use after hyperref)
 %\crefformat{footnote}{#2\footnotemark[#1]#3}
