@@ -572,6 +572,9 @@ function checkProject() {
   echo "Checking for duplicated/repeated words...";
   grep -rEo '\b(\w+)(\s+\1\b)+' $_dir_sources/
 
+  echo "Checking for citations with missing space...";
+  grep -rEo '[^~%]\\\cite{' $_dir_sources/
+
   echo "Checking config...";
   checkRule "$BAD_CONFIG" "$_file_config" "Avoid";
   if [ "$?" != "0" ]; then _error=1; fi
