@@ -435,6 +435,7 @@ function checkRule() {
     _filename="$2";
     _message="$3";
     _casesens="$4";
+    state=0
     IFS="#";
 
     if [ ! -f "$_filename" ]; then
@@ -451,7 +452,7 @@ function checkRule() {
       fi
       if [ "$found" != "" ]; then
         echo "warning: $_message '$word' in $_filename.";
-        state=1;
+        state=1
       fi
     done
 
@@ -586,7 +587,7 @@ function checkProject() {
   echo "Checking todos...";
   for file in $_dir_sources/*.tex; do
     checkRule "$TODOS" "$file" "";
-    if [ "$?" != "0" ]; then _error=1; fi
+    #if [ "$?" != "0" ]; then _error=1; fi
   done
 
   echo "Checking orthography...";
@@ -598,8 +599,8 @@ function checkProject() {
   fi
 
   echo "Checking abstract...";
-  checkRule "$BAD_ABSTRACT" "$_file_abstract" "Avoid";
-    if [ "$?" != "0" ]; then _error=1; fi
+  checkRule "$BAD_ABSTRACT" "$_file_abstract" "Avoid"
+  if [ "$?" != "0" ]; then _error=1; fi
   WORDS=`cat $_filename | perl -pe "s/%.*$//g" | wc -w`;
   if [ $WORDS -lt "$MIN_ABSTRACT" ] || [ $WORDS -gt "$MAX_ABSTRACT" ]; then
     echo "warning: you've $WORDS words in your abstract [Should be: $MIN_ABSTRACT-$MAX_ABSTRACT].";

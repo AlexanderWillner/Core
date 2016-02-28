@@ -1,10 +1,4 @@
 #!/bin/bash
-#===============================================================================
-#/**
-# * LaTeX review template (build config)
-# * @author  : Alexander willner (willner@cs.uni-bonn.de)
-# */
-#===============================================================================
 DEBUG=0;               # 0 = output to log, 1 = show output
 DOINDEX=0;             # 0 = no index, 1 = create index
 DOBIBTEX=0;            # 0 = do not call BibTeX, 1 = call BibTeX
