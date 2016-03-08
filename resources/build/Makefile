@@ -19,6 +19,7 @@ help:
 	@echo " * optimize  : Optimize output (e.g. optipng)"
 	@echo " * sign      : Sign the PDF using an X.509 certificate"
 	@echo " * preflight : Test for PDF/A and PDF/X compatibility"
+	@echo " * fix       : Give some hints on how to fix the current setup"
 
 clean:
 	@./build.sh -c
@@ -76,6 +77,9 @@ preflight:
 
 rename:
 	@./build.sh -n
+
+fix:
+	@echo 'You should run: rm -rf $$(biber --cache)'
 
 update:
 	@git submodule foreach git pull origin master
