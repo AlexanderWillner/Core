@@ -21,6 +21,10 @@ help:
 	@echo " * preflight : Test for PDF/A and PDF/X compatibility"
 	@echo " * fix       : Give some hints on how to fix the current setup"
 	@echo " * todo      : Find open todos"
+	@echo " * debug     : Compile and stop on error and show line number"
+
+debug:
+	@./build.sh -y
 
 todo:
 	@find . -iname "*.tex" -exec sh -c "grep -Hin 'TODO{' {}|sed 's/^\(.*\):\(.*\):.*{\(.*\)}/ * TODO \"\3\" in file \1 in line \2/'" \;
