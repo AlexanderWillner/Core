@@ -91,7 +91,9 @@ rename:
 	@./build.sh -n
 
 fix:
-	@echo 'You should run: rm -rf $$(biber --cache)'
+	@echo 'You should run the following commands: '
+	@echo rm -rf $(shell biber --cache)
+	@echo make clean update debug
 
 update:
 	@git submodule foreach git pull origin master
