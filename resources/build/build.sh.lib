@@ -752,6 +752,7 @@ function doLatex() {
 function debug() {
 	_dir_tmp="$1";
 	_file_main="$2";
+  mkdir -p "${_dir_tmp}"
 	echo -n "Running LaTeX in debug mode...";
     pdflatex \
       -halt-on-error \
