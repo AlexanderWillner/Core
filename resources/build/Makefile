@@ -22,6 +22,10 @@ help:
 	@echo " * fix       : Give some hints on how to fix the current setup"
 	@echo " * todo      : Find open todos"
 	@echo " * debug     : Compile and stop on error and show line number"
+	@echo " * updating  : Keep updating in the background to avoid conflicts"
+
+updating:
+	@while true; do $(MAKE) update; sleep 30; done 
 
 debug:
 	@./build.sh -y
