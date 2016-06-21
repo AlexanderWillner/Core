@@ -65,7 +65,6 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 {0.31,0.46,.64}                       %
 \definecolor{MarginColor}{rgb}        % Margin color
 {0.31,0.46,.64}                       %
-\usepackage{marginnote}               % Non floating margin notes
 \usepackage{subcaption}               % Subfigures
 \usepackage{wrapfig}                  % Use floating images
 \usepackage{stfloats}                 % Makes LaTeX honour ‘[b]’ placement
@@ -205,6 +204,8 @@ protrusion=true]{microtype}           % Fonts: margin kerning
     Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
     \color{black}%
 }
+
+\usepackage{marginnote}               % Non floating margin notes
 %\setlength{\marginparwidth}{0.7in}
 \newcommand\sidenote[1]{\mbox{}%
   \marginnote{%
@@ -219,30 +220,18 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 }%
 
 %for two-column layout
+\usepackage{needspace}
 \makeatletter
-\g@addto@macro\@mn@margintest{% chktex 21
-  \if@twocolumn%
-    \ifx\@mn@currxpos\relax% don't know which margin use normal one chktex 21
-      \normalmarginpar%
-    \else\ifx\@mn@currxpos\@empty% don't know which margin use normal one chktex 21
-        \normalmarginpar%
-      \else
-        \if@tempswa% use \oddsidemargin for tests
-          \ifdim\@mn@currxpos\ >\dimexpr\ \oddsidemargin+1in+\columnwidth\relax% chktex 21
-            \normalmarginpar% right column --> right margin
-          \else
-            \reversemarginpar% left column --> left margin
-          \fi
-        \else% use \evensidemargin for tests
-          \ifdim\@mn@currxpos\ >\dimexpr\ \evensidemargin+1in+\columnwidth\relax% chktex 21
-            \reversemarginpar% right column --> right margin
-          \else
-            \normalmarginpar% left column --> left margin
-          \fi
-        \fi
-      \fi
-    \fi
-  \fi
+\let\oldmarginnote\marginnote
+\renewcommand*{\marginnote}[1]{%
+   \begingroup%
+   \ifodd\value{page}
+     \if@firstcolumn\reversemarginpar\fi
+   \else
+     \if@firstcolumn\else\reversemarginpar\fi
+   \fi
+   \needspace{\baselineskip}\oldmarginnote{#1}%
+   \endgroup%
 }
 \makeatother
 % annotations --------------------------------------------------------------
