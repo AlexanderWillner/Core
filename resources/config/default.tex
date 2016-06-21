@@ -206,6 +206,21 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 }
 
 \usepackage{marginnote}               % Non floating margin notes
+%for two-column layout
+\makeatletter
+\let\oldmarginnote\marginnote
+\renewcommand*{\marginnote}[1]{%
+ \begingroup\strut
+     \if@firstcolumn
+      \reversemarginpar
+      \oldmarginnote{#1}%
+     \else
+      \normalmarginpar
+      \oldmarginnote{#1}%
+     \fi
+ \endgroup%
+}
+\makeatother
 %\setlength{\marginparwidth}{0.7in}
 \newcommand\sidenote[1]{\mbox{}%
   \marginnote{%
@@ -219,21 +234,6 @@ protrusion=true]{microtype}           % Fonts: margin kerning
   }%
 }%
 
-%for two-column layout
-\usepackage{needspace}
-\makeatletter
-\let\oldmarginnote\marginnote
-\renewcommand*{\marginnote}[1]{%
-   \begingroup%
-   \ifodd\value{page}
-     \if@firstcolumn\reversemarginpar\fi
-   \else
-     \if@firstcolumn\else\reversemarginpar\fi
-   \fi
-   \needspace{\baselineskip}\oldmarginnote{#1}%
-   \endgroup%
-}
-\makeatother
 % annotations --------------------------------------------------------------
 
 % more listings ------------------------------------------------------------
