@@ -23,7 +23,17 @@ help:
 	@echo " * todo      : Find open todos"
 	@echo " * debug     : Compile and stop on error and show line number"
 	@echo " * updating  : Keep updating in the background to avoid conflicts"
+	@echo " * ieee      : Enable IEEE Transaction style"
+	@echo " * llncs     : Enable LLNCS style"
 
+ieee:
+	@echo "Changing to IEEE Transaction style..."
+	@find . -iname "*.tex" -depth 1 -exec perl -p -i -e 's/([\s])*%+([^%]*)(% enable for IEEE style)/\1\2\3/g' {} \; -exec perl -p -i -e 's/([\s])*([^%]*)(% enable for LLNCS style)/\1%\2\3/g' {} \;
+
+llncs:
+	@echo "Changing to LLNCS Transaction style..."
+	@find . -iname "*.tex" -depth 1 -exec perl -p -i -e 's/([\s])*%+([^%]*)(% enable for LLNCS style)/\1\2\3/g' {} \; -exec perl -p -i -e 's/([\s])*([^%]*)(% enable for IEEE style)/\1%\2\3/g' {} \;
+	
 updating:
 	@while true; do $(MAKE) update; sleep 30; done 
 
