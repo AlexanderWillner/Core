@@ -32,11 +32,23 @@
 \makeatother
 % ------------------------------------------------------------------------------
 
-% File encoding: Normal UTF8
+% File encoding: Normal UTF8 ---------------------------------------------------
 \usepackage{cmap}                     % Support copy and search for pdflatex
 %\input{glyphtounicode}                % Support copy and search for pdflatex
 %\pdfgentounicode=1                    % Support copy and search for pdflatex
 \IfPackageNotLoaded{CJKutf8}{\usepackage[utf8]{inputenc}}
+\makeatletter
+\def\UTFviii@defined#1{%
+  \ifx#1\relax
+      ((TODO:\@ Fix weird character here))%
+  \else\expandafter
+    #1%
+  \fi
+}
+\makeatother
+% ------------------------------------------------------------------------------
+
+% ------------------------------------------------------------------------------
 \usepackage{amssymb}                  % Springer Verlag (pdflatex)
 \usepackage[hyphens]{url}             % Create URLs in the document
 \usepackage[
@@ -208,14 +220,14 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 \usepackage{marginnote}               % Non floating margin notes
 %for two-column layout
 \makeatletter
-\let\oldmarginnote\marginnote
+\let\oldmarginnote\marginnote%
 \renewcommand*{\marginnote}[1]{%
- \begingroup\strut
-     \if@firstcolumn
-      \reversemarginpar
+ \begingroup\strut%
+     \if@firstcolumn%
+      \reversemarginpar%
       \oldmarginnote{#1}%
      \else
-      \normalmarginpar
+      \normalmarginpar%
       \oldmarginnote{#1}%
      \fi
  \endgroup%
