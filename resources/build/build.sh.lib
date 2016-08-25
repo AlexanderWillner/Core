@@ -41,11 +41,11 @@ function doDefaultProject() {
        [ "$clean" ] || [ "$spelling" ] || [ "$eval" ] || [ "$generate" ] || [ "$deploy" ] || \
        [ "$open" ] || [ "$ci" ] || [ "$unicode" ] || [ "$optimize" ] || [ "$rename" ] || \
        [ "$bibcheck" ] || [ "$sign" ] || [ "$preflight" ] || [ "$debug" ] ; then
-        
+
         if [ "$debug" ]; then
             debug "$DIR_TMP" "$FILE_MAIN"
         fi;
-        
+
         if [ "$rename" ]; then
             rename
         fi;
@@ -263,7 +263,6 @@ function optimize() {
 
   echo "Optimizing PDFs..."
   checkEnvironment gs || exit 1
-  checkEnvironment pdfopt || exit 1
   for pdf in ${DIR_IMG}/*.optimized.pdf; do
     if [ "${pdf}" != "${DIR_IMG}/*.optimized.pdf" ]; then
       echo "ERROR: old file '${pdf}' found"
