@@ -222,15 +222,14 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 \makeatletter
 \let\oldmarginnote\marginnote%
 \renewcommand*{\marginnote}[1]{%
- \begingroup\strut%
-     \if@firstcolumn%
-      \reversemarginpar%
-      \oldmarginnote{#1}%
-     \else
-      \normalmarginpar%
-      \oldmarginnote{#1}%
-     \fi
- \endgroup%
+   \begingroup%
+   \ifoddpage\value{page}
+     \if@firstcolumn\reversemarginpar\fi
+   \else
+     \if@firstcolumn\else\reversemarginpar\fi
+   \fi
+   \needspace{\baselineskip}\oldmarginnote{#1}%
+   \endgroup%
 }
 \makeatother
 %\setlength{\marginparwidth}{0.7in}
