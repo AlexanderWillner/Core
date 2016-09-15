@@ -4,7 +4,6 @@
 # Script to create a new project based on a template.
 #
 # @tested	On OS X 10.7
-# @author	Alexander Willner <alexander.willner@tu-berlin.de>
 # @version	2012-03-21
 ###############################################################################
 

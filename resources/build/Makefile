@@ -19,6 +19,29 @@ help:
 	@echo " * optimize  : Optimize output (e.g. optipng)"
 	@echo " * sign      : Sign the PDF using an X.509 certificate"
 	@echo " * preflight : Test for PDF/A and PDF/X compatibility"
+	@echo " * fix       : Give some hints on how to fix the current setup"
+	@echo " * todo      : Find open todos"
+	@echo " * debug     : Compile and stop on error and show line number"
+	@echo " * updating  : Keep updating in the background to avoid conflicts"
+	@echo " * ieee      : Enable IEEE Transaction style"
+	@echo " * llncs     : Enable LLNCS style"
+
+ieee:
+	@echo "Changing to IEEE Transaction style..."
+	@find . -iname "*.tex" -depth 1 -exec perl -p -i -e 's/([\s])*%+([^%]*)(% enable for IEEE style)/\1\2\3/g' {} \; -exec perl -p -i -e 's/([\s])*([^%]*)(% enable for LLNCS style)/\1%\2\3/g' {} \;
+
+llncs:
+	@echo "Changing to LLNCS Transaction style..."
+	@find . -iname "*.tex" -depth 1 -exec perl -p -i -e 's/([\s])*%+([^%]*)(% enable for LLNCS style)/\1\2\3/g' {} \; -exec perl -p -i -e 's/([\s])*([^%]*)(% enable for IEEE style)/\1%\2\3/g' {} \;
+	
+updating:
+	@while true; do $(MAKE) update; sleep 30; done 
+
+debug:
+	@./build.sh -y
+
+todo:
+	@find . -iname "*.tex" -exec sh -c "grep -Hin 'TODO{' {}|sed 's/^\(.*\):\(.*\):.*{\(.*\)}/ * TODO \"\3\" in file \1 in line \2/'" \;
 
 clean:
 	@./build.sh -c
@@ -76,6 +99,11 @@ preflight:
 
 rename:
 	@./build.sh -n
+
+fix:
+	@echo 'You should run the following commands: '
+	@echo rm -rf $(shell biber --cache)
+	@echo make clean update debug
 
 update:
 	@git submodule foreach git pull origin master

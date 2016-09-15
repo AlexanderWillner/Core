@@ -32,12 +32,23 @@
 \makeatother
 % ------------------------------------------------------------------------------
 
-% File encoding: Normal UTF8
-\IfPackageNotLoaded{CJKutf8}{\usepackage[utf8]{inputenc}}
-
-%\usepackage{cmap}                     % Support copy and search for pdflatex
+% File encoding: Normal UTF8 ---------------------------------------------------
+\usepackage{cmap}                     % Support copy and search for pdflatex
 %\input{glyphtounicode}                % Support copy and search for pdflatex
 %\pdfgentounicode=1                    % Support copy and search for pdflatex
+\IfPackageNotLoaded{CJKutf8}{\usepackage[utf8]{inputenc}}
+\makeatletter
+\def\UTFviii@defined#1{%
+  \ifx#1\relax
+      ((TODO:\@ Fix weird character here))%
+  \else\expandafter
+    #1%
+  \fi
+}
+\makeatother
+% ------------------------------------------------------------------------------
+
+% ------------------------------------------------------------------------------
 \usepackage{amssymb}                  % Springer Verlag (pdflatex)
 \usepackage[hyphens]{url}             % Create URLs in the document
 \usepackage[
@@ -61,12 +72,11 @@ protrusion=true]{microtype}           % Fonts: margin kerning
         inputencoding=utf8            % Enable UTF8
         }
 \usepackage{algorithmic}              % Nice pseudo code
-\usepackage{xcolor}                   % To use and define colors
+\usepackage[table]{xcolor}                   % To use and define colors
 \definecolor{LinkColor}{rgb}          % Link color
 {0.31,0.46,.64}                       %
 \definecolor{MarginColor}{rgb}        % Margin color
 {0.31,0.46,.64}                       %
-\usepackage{marginnote}               % Non floating margin notes
 \usepackage{subcaption}               % Subfigures
 \usepackage{wrapfig}                  % Use floating images
 \usepackage{stfloats}                 % Makes LaTeX honour ‘[b]’ placement
@@ -84,6 +94,10 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 \usepackage{ltablex}                  % Long complex tables
 \newcolumntype{L}{>{\raggedright\arraybackslash}X}
 \usepackage[switch*,modulo]{lineno}   % Show line numbers
+\usepackage{accsupp}                  % Don't copy line numbers (see below)
+\renewcommand{\thelinenumber}{        % Line number printing mechanism
+  \BeginAccSupp{ActualText={}}\arabic{linenumber}\EndAccSupp{}%
+}
 \usepackage{blindtext}                % insert blind texts
 %\usepackage{cleveref}                 % To ref footnotes twice (use after hyperref)
 %\crefformat{footnote}{#2\footnotemark[#1]#3}
@@ -202,6 +216,22 @@ protrusion=true]{microtype}           % Fonts: margin kerning
     Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
     \color{black}%
 }
+
+\usepackage{marginnote}               % Non floating margin notes
+%for two-column layout
+\makeatletter
+\let\oldmarginnote\marginnote%
+\renewcommand*{\marginnote}[1]{%
+   \begingroup%
+   \ifoddpage\value{page}
+     \if@firstcolumn\reversemarginpar\fi
+   \else
+     \if@firstcolumn\else\reversemarginpar\fi
+   \fi
+   \needspace{\baselineskip}\oldmarginnote{#1}%
+   \endgroup%
+}
+\makeatother
 %\setlength{\marginparwidth}{0.7in}
 \newcommand\sidenote[1]{\mbox{}%
   \marginnote{%
@@ -215,33 +245,6 @@ protrusion=true]{microtype}           % Fonts: margin kerning
   }%
 }%
 
-%for two-column layout
-\makeatletter
-\g@addto@macro\@mn@margintest{% chktex 21
-  \if@twocolumn%
-    \ifx\@mn@currxpos\relax% don't know which margin use normal one chktex 21
-      \normalmarginpar%
-    \else\ifx\@mn@currxpos\@empty% don't know which margin use normal one chktex 21
-        \normalmarginpar%
-      \else
-        \if@tempswa% use \oddsidemargin for tests
-          \ifdim\@mn@currxpos\ >\dimexpr\ \oddsidemargin+1in+\columnwidth\relax% chktex 21
-            \normalmarginpar% right column --> right margin
-          \else
-            \reversemarginpar% left column --> left margin
-          \fi
-        \else% use \evensidemargin for tests
-          \ifdim\@mn@currxpos\ >\dimexpr\ \evensidemargin+1in+\columnwidth\relax% chktex 21
-            \reversemarginpar% right column --> right margin
-          \else
-            \normalmarginpar% left column --> left margin
-          \fi
-        \fi
-      \fi
-    \fi
-  \fi
-}
-\makeatother
 % annotations --------------------------------------------------------------
 
 % more listings ------------------------------------------------------------

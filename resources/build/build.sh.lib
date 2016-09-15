@@ -7,10 +7,10 @@
 #===============================================================================
 # Defaults
 #===============================================================================
-[[ -z $BIN_NOT ]] && BIN_NOT=terminal-notifier
 [[ -z $BIN_BIB ]] && BIN_BIB=bibtex
 command -v $BIN_BIB >/dev/null 2>&1 || { echo >&2 "I require $BIN_BIB but it's not installed.  Aborting."; exit 1; }
 command -v qpdf >/dev/null 2>&1 && { BIN_PDF="qpdf"; }
+command -v terminal-notifier >/dev/null 2>&1 && { BIN_NOT="terminal-notifier"; }
 
 #===============================================================================
 # Method declaration
@@ -40,7 +40,11 @@ function doDefaultProject() {
     if [ "$verify" ] || [ "$build" ] || [ "$quick" ] || [ "$quicker" ] || [ "$dobib" ] || \
        [ "$clean" ] || [ "$spelling" ] || [ "$eval" ] || [ "$generate" ] || [ "$deploy" ] || \
        [ "$open" ] || [ "$ci" ] || [ "$unicode" ] || [ "$optimize" ] || [ "$rename" ] || \
-       [ "$bibcheck" ] || [ "$sign" ] || [ "$preflight" ]; then
+       [ "$bibcheck" ] || [ "$sign" ] || [ "$preflight" ] || [ "$debug" ] ; then
+
+        if [ "$debug" ]; then
+            debug "$DIR_TMP" "$FILE_MAIN"
+        fi;
 
         if [ "$rename" ]; then
             rename
@@ -144,7 +148,7 @@ function doDefaultProject() {
             [ "1" == "$DOOPT" ] && [ -n "$BIN_PDF" ] && ( $BIN_PDF --linearize $DIR_TMP/$NAME.pdf $NAME.pdf )
             showWarnings;
             echo "File created: $NAME.pdf";
-            [ -z "$BIN_PDF" ]|| ( echo -n "Pages: "; $BIN_PDF --show-npages $NAME.pdf )
+            [ -z "$BIN_PDF" ] || ( echo -n "Pages: "; $BIN_PDF --show-npages $NAME.pdf )
             [ -z "$BIN_NOT" ] || $BIN_NOT -title "LaTeX" -message "Build ready" -open "file://$(pwd)/$NAME.pdf"
         fi;
 
@@ -175,10 +179,13 @@ function checkParameter() {
   SYNTAX="Syntax: $0 [-c (clean)] [-b (build)] [-i (bIbtex)] [-r (quicker build)] [-q (quick build)] [-v (verify)] \
      [-w (bib checking)] [-s (spell checking)] [-e (run the evaluation)] [-g (generate images etc.)] \
      [-d (deploy)] [-o (open)] [-f (continuous integration)] [-u (unicode check)] \
-     [-z (optimize)] [-x (X.509 signature)] [-p (preflight)] [-n (rename)] [-h (help)]";
-  while getopts ":qrchvsbiegdfounwzxp" optname
+     [-z (optimize)] [-x (X.509 signature)] [-p (preflight)] [-n (rename)] [-y (debug)] [-h (help)]";
+  while getopts ":qrchvsbiegdfounwzxyp" optname
   do
     case "$optname" in
+      "y")
+        debug=1;
+        ;;
       "q")
         quick=1;
         ;;
@@ -256,18 +263,27 @@ function optimize() {
 
   echo "Optimizing PDFs..."
   checkEnvironment gs || exit 1
-  checkEnvironment pdfopt || exit 1
+  for pdf in ${DIR_IMG}/*.optimized.pdf; do
+    if [ "${pdf}" != "${DIR_IMG}/*.optimized.pdf" ]; then
+      echo "ERROR: old file '${pdf}' found"
+      exit 1
+    fi
+  done
   for pdf in ${DIR_IMG}/*.pdf; do
         echo "Optimizing $pdf..."
         gs -o "${pdf}.optimized.pdf" \
            -dBATCH -dNOPAUSE \
            -sDEVICE=pdfwrite \
+           -dCompatibilityLevel=1.4 \
+           -dPDFA=2 \
+           -dPDFACompatibilityPolicy=1 \
            -dPDFSETTINGS=/prepress \
            -dDetectDuplicateImages=true \
            -dCompressFonts=true \
            -dSubsetFonts=true \
            -dEmbedAllFonts=true \
            -dCompressPages=true \
+           -dNOINTERPOLATE \
            -dAutoFilterColorImages=false \
            -dAutoFilterGrayImages=false \
            -dColorImageFilter=/FlateEncode \
@@ -276,9 +292,10 @@ function optimize() {
            -dDownsampleMonoImages=false \
            -dDownsampleGrayImages=false \
            -dDownsampleColorImages=false \
-           -dFastWebView \
            ${pdf} >> optimize.log 2>&1 && \
-        mv "${pdf}.optimized.pdf" ${pdf} || ( echo "ERROR: $pdf"; exit 1; )
+        mv "${pdf}.optimized.pdf" ${pdf} || ( echo "ERROR: $pdf - see optimize.log"; exit 1; )
+        # perl -pi -e 's/Interpolate true/Interpolate false/g' ${pdf} # can damage a file
+        #           -dFastWebView # GhostScript BUG 696280
   done
 
   echo "Optimizing PNGs..."
@@ -302,6 +319,15 @@ function preflight() {
     fi
   done
 
+  echo "Looking for interpolated PDF's'..."
+  for pdf in ${_dir_img}/*.pdf; do
+    interpolated="$(strings ${pdf}|grep -i "interpolate true")"
+    if [ ! -z "${interpolated}" ]; then
+      echo "WARNING: file '$pdf' uses interpolation"
+      _error=1
+    fi
+  done
+
   echo "Looking for non-embedded fonts..."
   for pdf in ${_dir_img}/*.pdf; do
     list=$(pdffonts "${pdf}"|awk -F '[[:space:]][[:space:]]+' '{print $4}'| awk '{print $1}')
@@ -316,7 +342,7 @@ function preflight() {
     fi
   done
 
-  echo "Looking for ICC color profiles..."
+  echo "Looking for ICC color profiles (might result in wrong colors in PDF/A)..."
   for pdf in ${_dir_img}/*.pdf; do
     icc=$(pdfimages -list ${pdf}|grep -i icc)
     if [ ! -z "${icc}" ]; then
@@ -325,15 +351,23 @@ function preflight() {
     fi
   done
 
-  echo "Looking transparency in PDFs..."
+  echo "Looking transparency in PDFs (forbidden in PDF/A1-b)..."
   for pdf in ${_dir_img}/*.pdf; do
     transparent=$(grep -aE -e '/[Cc][Aa] +0?\.[0-9]' -e '/SMask' -e '/S /Transparency' ${pdf})
     if [ ! -z "$transparent" ]; then
-      echo "WARNING: File ${pdf} contains transparency. Consider to fix it my using 'gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.3 ...'"
-      # open ${pdf}
+      echo "WARNING: File ${pdf} contains transparency. Remove tranparency/shadows or include a bitmap.'"
+      #mkdir -p "resources/images-vector"; if [ ! -f "resources/images-vector/$(basename ${pdf})" ]; then cp ${pdf} "resources/images-vector/$(basename ${pdf})"; fi
+      #gs -r300 -dBATCH -dNOPAUSE -sDEVICE=pdfwrite -sDEVICE=pdfwrite -dCompatibilityLevel=1.3 -sOutputFile="${pdf}" "resources/images-vector/$(basename ${pdf})"
+      #gs -q -dNOPAUSE -dBATCH -sDEVICE=pngalpha -r150 -dEPSCrop -sOutputFile="${pdf}.png" ${pdf}
       _error=1
     fi
   done
+
+  echo "Generating a PDF/A2-b compatible file..."
+  params="-dBATCH -dNOPAUSE -q -dNOOUTERSAVE -sDEVICE=pdfwrite -dPDFACompatibilityPolicy=1 -sColorConversionStrategy=/RGB -sProcessColorModel=DeviceCMYK -dEmbedAllFonts=true -dMaxSubsetPct=100 -dSubsetFonts=true -dPDFSETTINGS=/prepress"
+  gs ${params} -dPDFA=2 -sOutputFile="pdfa2-b_${_file_pdf}" lib/resources/pdfa/PDFA_def.ps ${_file_pdf}
+  #gs ${params} -dPDFA=1 -sOutputFile="pdfa1-b_${_file_pdf}" lib/resources/pdfa/PDFA_def.ps ${_file_pdf}
+   #-dFastWebView=true  # Bug 696275
 }
 
 function sign() {
@@ -407,6 +441,7 @@ function checkRule() {
     _filename="$2";
     _message="$3";
     _casesens="$4";
+    state=0
     IFS="#";
 
     if [ ! -f "$_filename" ]; then
@@ -423,7 +458,7 @@ function checkRule() {
       fi
       if [ "$found" != "" ]; then
         echo "warning: $_message '$word' in $_filename.";
-        state=1;
+        state=1
       fi
     done
 
@@ -519,7 +554,7 @@ function checkProject() {
     extension="${filename##*.}"
     filename="${filename%.*}"
     if [ "$extension" == "pdf" ] || [ "$extension" == "png" ] || [ "$extension" == "jpg" ] ; then
-      found=$(grep -rE "^\s*[^%]+includegraphics.*$filename[\.|}]" $DIR_SRC)
+      found=$(grep -rE "^\s*[^%]+(includegraphics|ThisLROffsetCornerWallPaper).*$filename[\.|}]" $DIR_SRC)
       if [ -z "${found}" ]; then
         echo "WARNING: figure '$image' not included in sources"
         #mv $image resources/images-unused
@@ -544,6 +579,9 @@ function checkProject() {
   echo "Checking for duplicated/repeated words...";
   grep -rEo '\b(\w+)(\s+\1\b)+' $_dir_sources/
 
+  echo "Checking for citations with missing space...";
+  grep -rEo '[^~%]\\\cite{' $_dir_sources/
+
   echo "Checking config...";
   checkRule "$BAD_CONFIG" "$_file_config" "Avoid";
   if [ "$?" != "0" ]; then _error=1; fi
@@ -555,7 +593,7 @@ function checkProject() {
   echo "Checking todos...";
   for file in $_dir_sources/*.tex; do
     checkRule "$TODOS" "$file" "";
-    if [ "$?" != "0" ]; then _error=1; fi
+    #if [ "$?" != "0" ]; then _error=1; fi
   done
 
   echo "Checking orthography...";
@@ -567,8 +605,8 @@ function checkProject() {
   fi
 
   echo "Checking abstract...";
-  checkRule "$BAD_ABSTRACT" "$_file_abstract" "Avoid";
-    if [ "$?" != "0" ]; then _error=1; fi
+  checkRule "$BAD_ABSTRACT" "$_file_abstract" "Avoid"
+  if [ "$?" != "0" ]; then _error=1; fi
   WORDS=`cat $_filename | perl -pe "s/%.*$//g" | wc -w`;
   if [ $WORDS -lt "$MIN_ABSTRACT" ] || [ $WORDS -gt "$MAX_ABSTRACT" ]; then
     echo "warning: you've $WORDS words in your abstract [Should be: $MIN_ABSTRACT-$MAX_ABSTRACT].";
@@ -707,6 +745,19 @@ function doLatex() {
 	errorlevel=$?
 	endLogging;
 	checkError $errorlevel;
+	echo "done";
+}
+
+function debug() {
+	_dir_tmp="$1";
+	_file_main="$2";
+  mkdir -p "${_dir_tmp}"
+	echo -n "Running LaTeX in debug mode...";
+    pdflatex \
+      -halt-on-error \
+      -file-line-error \
+      -output-directory $_dir_tmp \
+	    $_file_main
 	echo "done";
 }
 
