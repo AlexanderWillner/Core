@@ -25,6 +25,7 @@ help:
 	@echo " * updating  : Keep updating in the background to avoid conflicts"
 	@echo " * ieee      : Enable IEEE Transaction style"
 	@echo " * llncs     : Enable LLNCS style"
+	@echo " * content   : Answer basic questions to bootstrap your paper"
 
 ieee:
 	@echo "Changing to IEEE Transaction style..."
@@ -33,9 +34,32 @@ ieee:
 llncs:
 	@echo "Changing to LLNCS Transaction style..."
 	@find . -iname "*.tex" -depth 1 -exec perl -p -i -e 's/([\s])*%+([^%]*)(% enable for LLNCS style)/\1\2\3/g' {} \; -exec perl -p -i -e 's/([\s])*([^%]*)(% enable for IEEE style)/\1%\2\3/g' {} \;
-	
+
+content:
+	@read -p "Area: one sentence about the research area (which broad area are we considering?): " area; \
+	read -p "Issue: one sentence about the issue (what issue is getting to get solved?): " issue; \
+	read -p "Related Work: one sentence about the shortcomings of existing solutions: " related; \
+	read -p "Assumptions: made in general terms. In this paper, we assume ... : " assumptions; \
+	read -p "Approach: one sentence about the own approach: " approach; \
+	read -p "Validation: one sentence about the validation of the results. We have validated our approach by...: " validation; \
+	read -p "Result: one sentence about the main contribution. The main contribution of this paper is...: " result; \
+	perl -p -i -e "s/.*%%area/$$area. %%area/g" src/00_abstract.tex; \
+	perl -p -i -e "s/.*%%issue/$$issue. %%issue/g" src/00_abstract.tex; \
+	perl -p -i -e "s/.*%%related/$$related. %%related/g" src/00_abstract.tex; \
+	perl -p -i -e "s/.*%%assumptions/$$assumptions. %%assumptions/g" src/00_abstract.tex; \
+	perl -p -i -e "s/.*%%approach/$$approach. %%approach/g" src/00_abstract.tex; \
+	perl -p -i -e "s/.*%%validation/$$validation. %%validation/g" src/00_abstract.tex; \
+	perl -p -i -e "s/.*%%result/$$result. %%result/g" src/00_abstract.tex; \
+	perl -p -i -e "s/.*%%area/\\\todotext{$$area}%%area/g" src/01_introduction.tex; \
+	perl -p -i -e "s/.*%%issue/\\\todotext{$$issue}%%issue/g" src/01_introduction.tex; \
+	perl -p -i -e "s/.*%%related/\\\todotext{$$related}%%related/g" src/01_introduction.tex; \
+	perl -p -i -e "s/.*%%assumptions/In this paper, we assume \\\todotext{$$assumptions}%%assumptions/g" src/01_introduction.tex; \
+	perl -p -i -e "s/.*%%approach/\\\todotext{$$approach}%%approach/g" src/01_introduction.tex; \
+	perl -p -i -e "s/.*%%validation/We have validated our approach by \\\todotext{$$validation}%%validation/g" src/01_introduction.tex; \
+	perl -p -i -e "s/.*%%result/The main contribution of this paper is \\\todotext{$$result}%%result/g" src/01_introduction.tex
+
 updating:
-	@while true; do $(MAKE) update; sleep 30; done 
+	@while true; do $(MAKE) update; sleep 30; done
 
 debug:
 	@./build.sh -y
