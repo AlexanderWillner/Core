@@ -50,7 +50,9 @@
 
 % ------------------------------------------------------------------------------
 \usepackage{amssymb}                  % Springer Verlag (pdflatex)
-\usepackage[hyphens]{url}             % Create URLs in the document
+\makeatletter
+\@ifpackageloaded{url}{}{\usepackage[hyphens]{url}} % Create URLs in the document
+\makeatother
 \usepackage[
 spacing=true,                         % Fonts: spacing?
 kerning=true,
@@ -93,8 +95,12 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 \usepackage{ltxtable}                 % Long complex tables
 \usepackage{ltablex}                  % Long complex tables
 \newcolumntype{L}{>{\raggedright\arraybackslash}X}
-\usepackage[switch*,modulo]{lineno}   % Show line numbers
-\usepackage{accsupp}                  % Don't copy line numbers (see below)
+\makeatletter
+\@ifpackageloaded{lineno}{}{\usepackage[switch*,modulo]{lineno}}   % Show line numbers
+\makeatother
+\makeatletter
+\@ifpackageloaded{accsupp}{}{\usepackage{accsupp}} % Don't copy line numbers (see below)
+\makeatother
 \renewcommand{\thelinenumber}{        % Line number printing mechanism
   \BeginAccSupp{ActualText={}}\arabic{linenumber}\EndAccSupp{}%
 }
