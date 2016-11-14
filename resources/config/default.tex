@@ -74,12 +74,18 @@ protrusion=true]{microtype}           % Fonts: margin kerning
         inputencoding=utf8            % Enable UTF8
         }
 \usepackage{algorithmic}              % Nice pseudo code
-\usepackage[table]{xcolor}                   % To use and define colors
+\makeatletter
+\@ifpackageloaded{tex4ht}{%
+  \usepackage[dvips]{color,graphicx}
+}{
+  \usepackage[table]{xcolor}                   % To use and define colors
+  \usepackage{subcaption}               % Subfigures
+}
+\makeatother
 \definecolor{LinkColor}{rgb}          % Link color
 {0.31,0.46,.64}                       %
 \definecolor{MarginColor}{rgb}        % Margin color
 {0.31,0.46,.64}                       %
-\usepackage{subcaption}               % Subfigures
 \usepackage{wrapfig}                  % Use floating images
 \usepackage{stfloats}                 % Makes LaTeX honour ‘[b]’ placement
 \usepackage{amsmath}                  % For eqref
@@ -252,6 +258,9 @@ protrusion=true]{microtype}           % Fonts: margin kerning
     %\end{turn}%
   }%
 }%
+\makeatletter
+\@ifpackageloaded{tex4ht}{\renewcommand\sidenote[1]{}}{}
+\makeatother
 
 % annotations --------------------------------------------------------------
 
@@ -269,8 +278,8 @@ morecomment=[l][\color{grey}]{@},
 morecomment=[l][\color{black}]{\#},
 morestring=[b][\color{black}]\",
 }
-\definecolor{groovyblue}{HTML}{0000A0}
-\definecolor{groovygreen}{HTML}{008000}
+\definecolor{groovyblue}{rgb}{0,0,.9}
+\definecolor{groovygreen}{rgb}{0,.7,0}
 \definecolor{darkgray}{rgb}{.4,.4,.4}
 
 \lstdefinelanguage{Groovy}[]{Java}{
