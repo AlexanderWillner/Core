@@ -381,15 +381,15 @@ function sign() {
 }
 
 function rename() {
-    old=$(grep FILE_BASE= build.sh.config|sed -n -e 's/^.*="\(.*\)";/\1/p')
+    old=$(grep FILE_BASE= build.config.sh|sed -n -e 's/^.*="\(.*\)";/\1/p')
     echo "Old project name: ${old}"
     echo -n "New project name: "
     read new
     echo "Renaming ${old} to ${new}? (press CTRL+C to cancel)"
     read
     TMP_FILE=`mktemp /tmp/config.XXXXXXXXXX`
-    sed -e "s/BASE=\"${old}\"/BASE=\"${new}\"/" build.sh.config > $TMP_FILE
-    mv $TMP_FILE build.sh.config
+    sed -e "s/BASE=\"${old}\"/BASE=\"${new}\"/" build.config.sh > $TMP_FILE
+    mv $TMP_FILE build.config.sh
 
     TMP_FILE=`mktemp /tmp/config.XXXXXXXXXX`
     sed -e "s/{${old}}/{${new}}/" ${FILE_BASE}.tex > $TMP_FILE
