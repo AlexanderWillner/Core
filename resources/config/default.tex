@@ -242,7 +242,8 @@ protrusion=true]{microtype}           % Fonts: margin kerning
    \else
      \if@firstcolumn\else\reversemarginpar\fi
    \fi
-   \needspace{\baselineskip}\oldmarginnote{#1}%
+   %\needspace{\baselineskip} %% this can cause a space between paragraphs
+   \oldmarginnote{#1}%
    \endgroup%
 }
 \makeatother
