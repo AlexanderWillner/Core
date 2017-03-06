@@ -62,12 +62,14 @@ updating:
 	@while true; do $(MAKE) update; sleep 30; done
 
 debug:
+	@chmod +x build.sh
 	@./build.sh -y
 
 todo:
 	@find . -iname "*.tex" -exec sh -c "grep -Hin 'TODO{' {}|sed 's/^\(.*\):\(.*\):.*{\(.*\)}/ * TODO \"\3\" in file \1 in line \2/'" \;
 
 clean:
+	@chmod +x build.sh
 	@./build.sh -c
 
 all: generate
@@ -77,6 +79,7 @@ full:
 	@./build.sh -b
 
 quick:
+	@chmod +x build.sh
 	@./build.sh -q
 
 quicker:
