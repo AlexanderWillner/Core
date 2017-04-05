@@ -33,10 +33,11 @@
 % ------------------------------------------------------------------------------
 
 % File encoding: Normal UTF8 ---------------------------------------------------
-\usepackage{cmap}                     % Support copy and search for pdflatex
-%\input{glyphtounicode}                % Support copy and search for pdflatex
-%\pdfgentounicode=1                    % Support copy and search for pdflatex
 \IfPackageNotLoaded{CJKutf8}{\usepackage[utf8]{inputenc}}
+\usepackage[T1]{fontenc}              % Font encoding: T1
+%\usepackage{cmap}                     % Support copy and search for pdflatex
+\input{glyphtounicode}                 % Support copy and search for pdflatex
+%\pdfgentounicode=1                    % Support copy and search for pdflatex
 \makeatletter
 \def\UTFviii@defined#1{%
   \ifx#1\relax
@@ -60,7 +61,6 @@ tracking=true,                        % Fonts: hyphenatable letterspacing
 expansion=true,                       % Fonts: better grey value
 protrusion=true]{microtype}           % Fonts: margin kerning
 \microtypecontext{spacing=nonfrench}
-\usepackage[T1]{fontenc}              % Font encoding: T1
 \usepackage{textcomp}                 % For the Euro sign
 \usepackage{booktabs}                 % Nice tables
 \usepackage{listings}                 % Nice listings
