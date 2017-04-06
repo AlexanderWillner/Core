@@ -231,22 +231,26 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 
 \usepackage{ifoddpage}                % Move notes to correct page
 \usepackage{needspace}                % Avoid hanging notes
-\usepackage{marginnote}               % Non floating margin notes
+\usepackage{marginnote,zref-savepos}  % Non floating margin notes
+
 %for two-column layout
+\newcounter{labelnote}
 \makeatletter
-\let\oldmarginnote\marginnote%
+\let\oldmarginnote\marginnote
 \renewcommand*{\marginnote}[1]{%
-   \begingroup%
-   \ifoddpage\value{page}
-     \if@firstcolumn\reversemarginpar\fi
-   \else
-     \if@firstcolumn\else\reversemarginpar\fi
-   \fi
-   %\needspace{\baselineskip} %% this can cause a space between paragraphs
-   \oldmarginnote{#1}%
-   \endgroup%
+ \begingroup\strut
+  \stepcounter{labelnote}\zsaveposx {marginnote-\thelabelnote}
+     \ifnum 0\zposx{marginnote-\thelabelnote}<19000000
+      \reversemarginpar
+      \oldmarginnote{#1}%
+     \else
+      \normalmarginpar
+      \oldmarginnote{#1}%
+     \fi
+ \endgroup%
 }
 \makeatother
+
 %\setlength{\marginparwidth}{0.7in}
 \newcommand\sidenote[1]{\mbox{}%
   \marginnote{%
