@@ -34,15 +34,15 @@
 
 % File encoding: Normal UTF8 ---------------------------------------------------
 \IfPackageNotLoaded{CJKutf8}{\usepackage[utf8]{inputenc}}
-\usepackage[T1]{fontenc}              % Font encoding: T1
-%\usepackage{cmap}                     % Support copy and search for pdflatex
-\input{glyphtounicode}                 % Support copy and search for pdflatex
-%\pdfgentounicode=1                    % Support copy and search for pdflatex
+\usepackage[T1]{fontenc}     % Font encoding: T1
+%\usepackage{cmap}           % Support copy and search for pdflatex
+\input{glyphtounicode}       % Support copy and search for pdflatex % chktex 27
+%\pdfgentounicode=1          % Support copy and search for pdflatex
 \makeatletter
 \def\UTFviii@defined#1{%
   \ifx#1\relax
       ((TODO:\@ Fix weird character here))%
-  \else\expandafter
+  \else\expandafter% chktex 41
     #1%
   \fi
 }
@@ -236,15 +236,15 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 %for two-column layout
 \newcounter{labelnote}
 \makeatletter
-\let\oldmarginnote\marginnote
+\let\oldmarginnote\marginnote%
 \renewcommand*{\marginnote}[1]{%
- \begingroup\strut
-  \stepcounter{labelnote}\zsaveposx {marginnote-\thelabelnote}
-     \ifnum 0\zposx{marginnote-\thelabelnote}<19000000
-      \reversemarginpar
+ \begingroup\strut%
+  \stepcounter{labelnote}\zsaveposx{marginnote-\thelabelnote}
+     \ifnum0\zposx{marginnote-\thelabelnote}<19000000
+      \reversemarginpar%
       \oldmarginnote{#1}%
      \else
-      \normalmarginpar
+      \normalmarginpar%
       \oldmarginnote{#1}%
      \fi
  \endgroup%
