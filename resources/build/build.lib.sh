@@ -381,25 +381,27 @@ function sign() {
 }
 
 function rename() {
-    old=$(grep FILE_BASE= build.config.sh|sed -n -e 's/^.*="\(.*\)";/\1/p')
-    echo "Old project name: ${old}"
-    echo -n "New project name: "
-    read new
-    echo "Renaming ${old} to ${new}? (press CTRL+C to cancel)"
-    read
-    TMP_FILE=`mktemp /tmp/config.XXXXXXXXXX`
-    sed -e "s/BASE=\"${old}\"/BASE=\"${new}\"/" build.config.sh > $TMP_FILE
-    mv $TMP_FILE build.config.sh
+  old=$(grep FILE_BASE= build.config.sh|sed -n -e 's/^.*="\(.*\)";/\1/p')
+  echo "Old project name: ${old}"
+  echo -n "New project name: "
+  read new
+  TMP_FILE=`mktemp /tmp/config.XXXXXXXXXX`
+  sed -e "s/BASE=\"${old}\"/BASE=\"${new}\"/" build.config.sh > $TMP_FILE
+  mv $TMP_FILE build.config.sh
 
-    TMP_FILE=`mktemp /tmp/config.XXXXXXXXXX`
-    sed -e "s/{${old}}/{${new}}/" ${FILE_BASE}.tex > $TMP_FILE
-    mv $TMP_FILE ${FILE_BASE}.tex
+  TMP_FILE=`mktemp /tmp/config.XXXXXXXXXX`
+  sed -e "s/${old}\./${new}./" ${FILE_BASE}.tex > $TMP_FILE
+  mv $TMP_FILE ${FILE_BASE}.tex
+  
+  TMP_FILE=`mktemp /tmp/config.XXXXXXXXXX`
+  sed -e "s/${old}\./${new}./" ${FILE_BASE}.config.tex > $TMP_FILE
+  mv $TMP_FILE ${FILE_BASE}.config.tex
 
-    mv ${FILE_BIB} ${new}.bib
-    mv ${FILE_CONFIG} ${new}.config.tex
-    mv ${FILE_ACRO} ${new}.acro.tex
-    mv ${FILE_BASE}.tex ${new}.tex
-    mv ${FILE_BASE}.meta.tex ${new}.meta.tex
+  mv ${FILE_BIB} ${new}.bib
+  mv ${FILE_CONFIG} ${new}.config.tex
+  mv ${FILE_ACRO} ${new}.acro.tex
+  mv ${FILE_BASE}.tex ${new}.tex
+  mv ${FILE_BASE}.meta.tex ${new}.meta.tex
 }
 
 function checkUnicode() {
