@@ -478,6 +478,9 @@ function checkSpelling() {
       --add-tex-command="bibliographystyle po" \
       --add-tex-command="bibliography po" \
       --add-tex-command="eqref po" \
+      --add-tex-command="ac po" \
+      --add-tex-command="acp po" \
+      --add-tex-command="Cref po" \
       list`;
     if [ "$found" != "" ]; then
         echo "warning: Please add via aspell or correct in '$_filename' the word(s): $found";
@@ -498,6 +501,9 @@ function checkSpellingInteractive() {
         --add-tex-command="bibliographystyle po" \
         --add-tex-command="bibliography po" \
         --add-tex-command="eqref po" \
+        --add-tex-command="ac po" \
+        --add-tex-command="acp po" \
+        --add-tex-command="Cref po" \
         check $filename;
     done
 }
