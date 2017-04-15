@@ -481,6 +481,7 @@ function checkSpelling() {
       --add-tex-command="bibliography po" \
       --add-tex-command="eqref po" \
       --add-tex-command="ac po" \
+      --add-tex-command="aclu po" \
       --add-tex-command="acp po" \
       --add-tex-command="Cref po" \
       list`;
@@ -504,6 +505,7 @@ function checkSpellingInteractive() {
         --add-tex-command="bibliography po" \
         --add-tex-command="eqref po" \
         --add-tex-command="ac po" \
+        --add-tex-command="aclu po" \
         --add-tex-command="acp po" \
         --add-tex-command="Cref po" \
         check $filename;
