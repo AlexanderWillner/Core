@@ -33,15 +33,16 @@
 % ------------------------------------------------------------------------------
 
 % File encoding: Normal UTF8 ---------------------------------------------------
-\usepackage{cmap}                     % Support copy and search for pdflatex
-%\input{glyphtounicode}                % Support copy and search for pdflatex
-%\pdfgentounicode=1                    % Support copy and search for pdflatex
 \IfPackageNotLoaded{CJKutf8}{\usepackage[utf8]{inputenc}}
+\usepackage[T1]{fontenc}     % Font encoding: T1
+%\usepackage{cmap}           % Support copy and search for pdflatex
+\input{glyphtounicode}       % Support copy and search for pdflatex % chktex 27
+%\pdfgentounicode=1          % Support copy and search for pdflatex
 \makeatletter
 \def\UTFviii@defined#1{%
   \ifx#1\relax
       ((TODO:\@ Fix weird character here))%
-  \else\expandafter
+  \else\expandafter% chktex 41
     #1%
   \fi
 }
@@ -60,7 +61,6 @@ tracking=true,                        % Fonts: hyphenatable letterspacing
 expansion=true,                       % Fonts: better grey value
 protrusion=true]{microtype}           % Fonts: margin kerning
 \microtypecontext{spacing=nonfrench}
-\usepackage[T1]{fontenc}              % Font encoding: T1
 \usepackage{textcomp}                 % For the Euro sign
 \usepackage{booktabs}                 % Nice tables
 \usepackage{listings}                 % Nice listings
@@ -74,16 +74,22 @@ protrusion=true]{microtype}           % Fonts: margin kerning
         inputencoding=utf8            % Enable UTF8
         }
 \usepackage{algorithmic}              % Nice pseudo code
-\usepackage[table]{xcolor}                   % To use and define colors
+\makeatletter
+\@ifpackageloaded{tex4ht}{%
+  \usepackage[dvips]{color,graphicx}
+}{
+  \usepackage[table]{xcolor}                   % To use and define colors
+  \usepackage{subcaption}               % Subfigures
+}
+\makeatother
 \definecolor{LinkColor}{rgb}          % Link color
 {0.31,0.46,.64}                       %
 \definecolor{MarginColor}{rgb}        % Margin color
 {0.31,0.46,.64}                       %
-\usepackage{subcaption}               % Subfigures
 \usepackage{wrapfig}                  % Use floating images
 \usepackage{stfloats}                 % Makes LaTeX honour ‘[b]’ placement
 \usepackage{amsmath}                  % For eqref
-\usepackage{paralist}                 % For inline lists
+\usepackage[olditem,oldenum]{paralist}% For inline lists (options for MDPI)
 %\usepackage{fixltx2e}                 % Provides fixes for LaTeX (not needed for anymore since 2015)
 \usepackage{fix-cm}                   % Provides fixes for LaTeX
 \usepackage{rotating}                 % e.g. for the special side margin notes
@@ -225,21 +231,26 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 
 \usepackage{ifoddpage}                % Move notes to correct page
 \usepackage{needspace}                % Avoid hanging notes
-\usepackage{marginnote}               % Non floating margin notes
+\usepackage{marginnote,zref-savepos}  % Non floating margin notes
+
 %for two-column layout
+\newcounter{labelnote}
 \makeatletter
 \let\oldmarginnote\marginnote%
 \renewcommand*{\marginnote}[1]{%
-   \begingroup%
-   \ifoddpage\value{page}
-     \if@firstcolumn\reversemarginpar\fi
-   \else
-     \if@firstcolumn\else\reversemarginpar\fi
-   \fi
-   \needspace{\baselineskip}\oldmarginnote{#1}%
-   \endgroup%
+ \begingroup\strut%
+  \stepcounter{labelnote}\zsaveposx{marginnote-\thelabelnote}
+     \ifnum0\zposx{marginnote-\thelabelnote}<19000000
+      \reversemarginpar%
+      \oldmarginnote{#1}%
+     \else
+      \normalmarginpar%
+      \oldmarginnote{#1}%
+     \fi
+ \endgroup%
 }
 \makeatother
+
 %\setlength{\marginparwidth}{0.7in}
 \newcommand\sidenote[1]{\mbox{}%
   \marginnote{%
@@ -252,6 +263,9 @@ protrusion=true]{microtype}           % Fonts: margin kerning
     %\end{turn}%
   }%
 }%
+\makeatletter
+\@ifpackageloaded{tex4ht}{\renewcommand\sidenote[1]{}}{}
+\makeatother
 
 % annotations --------------------------------------------------------------
 
@@ -269,8 +283,8 @@ morecomment=[l][\color{grey}]{@},
 morecomment=[l][\color{black}]{\#},
 morestring=[b][\color{black}]\",
 }
-\definecolor{groovyblue}{HTML}{0000A0}
-\definecolor{groovygreen}{HTML}{008000}
+\definecolor{groovyblue}{rgb}{0,0,.9}
+\definecolor{groovygreen}{rgb}{0,.7,0}
 \definecolor{darkgray}{rgb}{.4,.4,.4}
 
 \lstdefinelanguage{Groovy}[]{Java}{
