@@ -26,6 +26,12 @@ help:
 	@echo " * ieee      : Enable IEEE Transaction style"
 	@echo " * llncs     : Enable LLNCS style"
 	@echo " * content   : Answer basic questions to bootstrap your paper"
+	@echo " * count     : Count number of words, figures, tables, captions, ..."
+
+count:
+	@echo "Counting..."
+	@command -v texcount >/dev/null 2>&1 || { echo >&2 "ERROR: run 'tlmgr install texcount' first."; exit 1; }
+	@texcount -nosub -total -utf8 src/*.tex
 
 ieee:
 	@echo "Changing to IEEE Transaction style..."
