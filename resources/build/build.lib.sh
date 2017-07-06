@@ -497,7 +497,7 @@ function checkSpellingInteractive() {
 	_language="$3";
 
 
-    for filename in $_dir_sources/*; do
+  find $_dir_sources -iname "*.tex" -exec \
       aspell --home-dir=$_dir_resources \
         --lang=$_language \
         --dont-backup --encoding=utf-8 --mode=tex --dont-tex-check-comments \
@@ -508,8 +508,7 @@ function checkSpellingInteractive() {
         --add-tex-command="aclu po" \
         --add-tex-command="acp po" \
         --add-tex-command="Cref po" \
-        check $filename;
-    done
+        check {} \;
 }
 
 
