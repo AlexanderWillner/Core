@@ -33,15 +33,16 @@
 % ------------------------------------------------------------------------------
 
 % File encoding: Normal UTF8 ---------------------------------------------------
-\usepackage{cmap}                     % Support copy and search for pdflatex
-%\input{glyphtounicode}                % Support copy and search for pdflatex
-%\pdfgentounicode=1                    % Support copy and search for pdflatex
 \IfPackageNotLoaded{CJKutf8}{\usepackage[utf8]{inputenc}}
+\usepackage[T1]{fontenc}     % Font encoding: T1
+%\usepackage{cmap}           % Support copy and search for pdflatex
+\input{glyphtounicode}       % Support copy and search for pdflatex % chktex 27
+%\pdfgentounicode=1          % Support copy and search for pdflatex
 \makeatletter
 \def\UTFviii@defined#1{%
   \ifx#1\relax
       ((TODO:\@ Fix weird character here))%
-  \else\expandafter
+  \else\expandafter% chktex 41
     #1%
   \fi
 }
@@ -60,7 +61,6 @@ tracking=true,                        % Fonts: hyphenatable letterspacing
 expansion=true,                       % Fonts: better grey value
 protrusion=true]{microtype}           % Fonts: margin kerning
 \microtypecontext{spacing=nonfrench}
-\usepackage[T1]{fontenc}              % Font encoding: T1
 \usepackage{textcomp}                 % For the Euro sign
 \usepackage{booktabs}                 % Nice tables
 \usepackage{listings}                 % Nice listings
@@ -76,7 +76,7 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 \usepackage{algorithmic}              % Nice pseudo code
 \makeatletter
 \@ifpackageloaded{tex4ht}{%
-  \usepackage[dvips]{color,graphicx}
+  \usepackage[dvipdfmx]{color,graphicx}
 }{
   \usepackage[table]{xcolor}                   % To use and define colors
   \usepackage{subcaption}               % Subfigures
@@ -231,22 +231,26 @@ protrusion=true]{microtype}           % Fonts: margin kerning
 
 \usepackage{ifoddpage}                % Move notes to correct page
 \usepackage{needspace}                % Avoid hanging notes
-\usepackage{marginnote}               % Non floating margin notes
+\usepackage{marginnote,zref-savepos}  % Non floating margin notes
+
 %for two-column layout
+\newcounter{labelnote}
 \makeatletter
 \let\oldmarginnote\marginnote%
 \renewcommand*{\marginnote}[1]{%
-   \begingroup%
-   \ifoddpage\value{page}
-     \if@firstcolumn\reversemarginpar\fi
-   \else
-     \if@firstcolumn\else\reversemarginpar\fi
-   \fi
-   %\needspace{\baselineskip} %% this can cause a space between paragraphs
-   \oldmarginnote{#1}%
-   \endgroup%
+ \begingroup\strut%
+  \stepcounter{labelnote}\zsaveposx{marginnote-\thelabelnote}
+     \ifnum0\zposx{marginnote-\thelabelnote}<19000000
+      \reversemarginpar%
+      \oldmarginnote{#1}%
+     \else
+      \normalmarginpar%
+      \oldmarginnote{#1}%
+     \fi
+ \endgroup%
 }
 \makeatother
+
 %\setlength{\marginparwidth}{0.7in}
 \newcommand\sidenote[1]{\mbox{}%
   \marginnote{%
@@ -292,14 +296,6 @@ morestring=[b][\color{black}]\",
   moredelim=[il][\textcolor{darkgray}]{§§}
 }
 % more listings ------------------------------------------------------------
-
-% IEEE copyright ---------------------------------------------------------------
-\usepackage[pscoord]{eso-pic}
-\newcommand{\ieeecopyright}[3]{
-  \setbox0=\hbox{#3}
-  \AddToShipoutPictureFG*{ \put(\LenToUnit{#1\paperwidth},\LenToUnit{#2\paperheight}){\vtop{{\null}\makebox[0pt][c]{#3}}}}
-}
-% IEEE copyright ---------------------------------------------------------------
 
 % show the hex code of the unknown unicode character to actually find it ----
 \usepackage{stringenc}

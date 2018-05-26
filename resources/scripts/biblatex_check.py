@@ -6,7 +6,7 @@ especially developed for requirements in Computer Science.
 """
 
 __author__ = "Pez Cuckow"
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 __credits__ = ["Pez Cuckow", "BibTex Check 0.2.0 by Fabian Beck"]
 __license__ = "MIT"
 __email__ = "email<at>pezcuckow.com"
@@ -46,7 +46,7 @@ requiredFields = {"article": ["author", "title", "journaltitle", "year/date"],
                   "patent": ["author", "title", "number", "year/date"],
                   "periodical": ["editor", "title", "year/date"],
                   "suppperiodical": "article",
-                  "proceedings": ["editor", "title", "year/date"],
+                  "proceedings": ["title", "year/date"],
                   "mvproceedings": "proceedings",
                   "inproceedings": ["author", "title", "booktitle", "year/date"],
                   "reference": "collection",
@@ -57,14 +57,15 @@ requiredFields = {"article": ["author", "title", "journaltitle", "year/date"],
                   "unpublished": ["author", "title", "year/date"],
 
                   # semi aliases (differing fields)
-                  "mastersthesis": ["author", "title", "school", "year/date"],
+                  "mastersthesis": ["author", "title", "institution", "year/date"],
                   "techreport": ["author", "title", "institution", "year/date"],
 
                   # other aliases
                   "conference": "inproceedings",
                   "electronic": "online",
                   "phdthesis": "mastersthesis",
-                  "www": "online"
+                  "www": "online",
+                  "school": "mastersthesis"
                   }
 
 ####################################################################
@@ -142,7 +143,7 @@ try:
 except IOError as e:
     print("ERROR: Input bib file '" + bibFile +
           "' doesn't exist or is not readable")
-    sys.exit()
+    sys.exit(-1)
 
 # Go through and check all references
 completeEntry = ""
@@ -578,3 +579,9 @@ html.close()
 if view:
     import webbrowser
     webbrowser.open(html.name)
+
+print("SUCCESS: Report {} has been generated".format(htmlOutput))
+
+if problemCount > 0:
+    print("WARNING: Found {} problems.".format(problemCount))
+    sys.exit(-1)
