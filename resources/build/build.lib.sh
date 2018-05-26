@@ -40,7 +40,7 @@ function doDefaultProject() {
     if [ "$verify" ] || [ "$build" ] || [ "$quick" ] || [ "$quicker" ] || [ "$dobib" ] || \
        [ "$clean" ] || [ "$spelling" ] || [ "$eval" ] || [ "$generate" ] || [ "$deploy" ] || \
        [ "$open" ] || [ "$ci" ] || [ "$unicode" ] || [ "$optimize" ] || [ "$rename" ] || \
-       [ "$bibcheck" ] || [ "$sign" ] || [ "$preflight" ] || [ "$debug" ] ; then
+       [ "$bibcheck" ] || [ "$sign" ] || [ "$preflight" ] || [ "$fix" ] || [ "$debug" ] ; then
 
         if [ "$debug" ]; then
             debug "$DIR_TMP" "$FILE_MAIN"
@@ -50,6 +50,10 @@ function doDefaultProject() {
             rename
         fi;
 
+        if [ "$fix" ]; then
+            fix "$FILE_BASE" "$DIR_SRC"
+        fi;
+        
         if [ "$optimize" ]; then
             optimize "$DIR_IMG"
         fi;
@@ -179,8 +183,8 @@ function checkParameter() {
   SYNTAX="Syntax: $0 [-c (clean)] [-b (build)] [-i (bIbtex)] [-r (quicker build)] [-q (quick build)] [-v (verify)] \
      [-w (bib checking)] [-s (spell checking)] [-e (run the evaluation)] [-g (generate images etc.)] \
      [-d (deploy)] [-o (open)] [-f (continuous integration)] [-u (unicode check)] \
-     [-z (optimize)] [-x (X.509 signature)] [-p (preflight)] [-n (rename)] [-y (debug)] [-h (help)]";
-  while getopts ":qrchvsbiegdfounwzxyp" optname
+     [-z (optimize)] [-x (X.509 signature)] [-p (preflight)] [-n (rename)] [-m (fix)] [-y (debug)] [-h (help)]";
+  while getopts ":qrchvsbiegdfounwzxmyp" optname
   do
     case "$optname" in
       "y")
@@ -239,6 +243,9 @@ function checkParameter() {
         ;;
       "n")
         rename=1;
+        ;;
+      "m")
+        fix=1;
         ;;
       "h")
         showHelp;
@@ -513,6 +520,15 @@ function checkSpellingInteractive() {
         check {} \;
 }
 
+function fix() {
+	_file_main="$1";
+	_dir_sources="$2";
+	
+	iconv -f UTF8-MAC -t UTF8 "$1.tex" > tmp.tmp && mv tmp.tmp "$1.tex"
+	iconv -f UTF8-MAC -t UTF8 "$1.config.tex" > tmp.tmp && mv tmp.tmp "$1.config.tex"
+	iconv -f UTF8-MAC -t UTF8 "$1.meta.tex" > tmp.tmp && mv tmp.tmp "$1.meta.tex"
+	find $_dir_sources -iname "*.tex" -exec sh -c "iconv -f UTF8-MAC -t UTF8 '{}' > tmp.tmp && mv tmp.tmp '{}'" \;
+}
 
 function checkBib() {
   _dir_sources="$1";
