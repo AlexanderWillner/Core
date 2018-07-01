@@ -69,70 +69,70 @@ content:
 updating:
 	@while true; do $(MAKE) update; sleep 30; done
 
-debug:
+fixmod:
 	@chmod +x build.sh
+
+debug: fixmod
 	@./build.sh -y
 
 todo:
 	@find src -iname "*.tex" -exec sh -c "grep -Hin 'TODO{' {}|sed 's/^\(.*\):\(.*\):.*{\(.*\)}/ * TODO \"\3\" in file \1 in line \2/'" \;
 
-clean:
-	@chmod +x build.sh
+clean: fixmod
 	@./build.sh -c
 
-all: generate
+all: generate fixmod
 	@./build.sh -b
 
-full:
+full: fixmod
 	@./build.sh -b
 
-quick:
-	@chmod +x build.sh
+quick: fixmod
 	@./build.sh -q
 
-quicker:
+quicker: fixmod
 	@./build.sh -r
 
-bib:
+bib: fixmod
 	@./build.sh -i
 
-bibchk:
+bibchk: fixmod
 	@./build.sh -w
 
-verify:
+verify: fixmod
 	@./build.sh -v
 
-spell:
+spell: fixmod
 	@./build.sh -s
 
-eval:
+eval: fixmod
 	@./build.sh -e
 
-generate:
+generate: fixmod
 	@./build.sh -g
 
-open:
+open: fixmod
 	@./build.sh -o
 
-deploy:
+deploy: fixmod
 	@./build.sh -d ${DPATH}
 
-ci:
+ci: fixmod
 	@./build.sh -f
 
-unicode:
+unicode: fixmod
 	@./build.sh -u
 
-optimize:
+optimize: fixmod
 	@./build.sh -z
 
-sign:
+sign: fixmod
 	@./build.sh -x
 
-preflight:
+preflight: fixmod
 	@./build.sh -p
 
-rename:
+rename: fixmod
 	@./build.sh -n
 
 fix:
