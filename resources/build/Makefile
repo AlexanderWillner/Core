@@ -1,3 +1,5 @@
+SHELL = bash
+
 help:
 	@echo " * clean     : Delete temporary files"
 	@echo " * all       : Create the PDF file (run everything needed)"
@@ -19,7 +21,7 @@ help:
 	@echo " * optimize  : Optimize output (e.g. optipng)"
 	@echo " * sign      : Sign the PDF using an X.509 certificate"
 	@echo " * preflight : Test for PDF/A and PDF/X compatibility"
-	@echo " * fix       : Give some hints on how to fix the current setup"
+	@echo " * fix       : Try to fix some common issues (file encoding, biber cache, ...)"
 	@echo " * todo      : Find open todos"
 	@echo " * debug     : Compile and stop on error and show line number"
 	@echo " * updating  : Keep updating in the background to avoid conflicts"
@@ -134,9 +136,9 @@ rename:
 	@./build.sh -n
 
 fix:
-	@echo 'You should run the following commands: '
-	@echo rm -rf $(shell biber --cache)
-	@echo make clean update debug
+	@echo -n "Removing biber cache..."; rm -rf "$(shell biber --cache)"; echo "done"
+	@echo -n "Normalizing Unicode..."; ./build.sh -m; echo "done"
+	@make clean
 
 update:
 	@git submodule foreach git pull origin master
