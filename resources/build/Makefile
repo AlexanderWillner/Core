@@ -1,4 +1,5 @@
 SHELL = bash
+.PHONY: overleaf
 
 help:
 	@echo " * clean     : Delete temporary files"
@@ -29,6 +30,15 @@ help:
 	@echo " * llncs     : Enable LLNCS style"
 	@echo " * content   : Answer basic questions to bootstrap your paper"
 	@echo " * count     : Count number of words, figures, tables, captions, ..."
+	@echo " * overleaf  : Open project in overleaf (if overleaf is used)"
+
+OID = $(shell grep 'url' .git/config|grep 'overleaf'|awk -F "/" '{print $$4}')
+overleaf:
+ifeq ($(strip $(OID)),)
+	@echo "Seems overleaf is not being used"
+else
+	@open https://www.overleaf.com/$(OID)
+endif
 
 count:
 	@echo "Counting..."
